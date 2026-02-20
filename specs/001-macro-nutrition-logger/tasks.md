@@ -24,13 +24,13 @@
 
 **Purpose**: Project initialization, dependencies, and build tooling
 
-- [ ] T001 Initialize React + TypeScript project with Vite in `frontend/` using `npm create vite@latest` with `react-ts` template
-- [ ] T002 Install frontend dependencies: `react-router-dom`, `zustand`, `@tailwindcss/vite` in `frontend/`
-- [ ] T003 Configure Tailwind CSS v4 in `frontend/tailwind.css` and add `@tailwindcss/vite` plugin to `frontend/vite.config.ts`
-- [ ] T004 Configure path aliases (`@/*` → `./src/*`) in `frontend/tsconfig.app.json` and `frontend/vite.config.ts`
-- [ ] T005 [P] Initialize Azure Functions v4 TypeScript project in `api/` with `@azure/functions` v4 dependency
-- [ ] T006 [P] Create `frontend/public/staticwebapp.config.json` with SPA navigation fallback and asset exclusions
-- [ ] T007 Define shared TypeScript types (FoodEntry, AIParseItem, AIParseResult, UserConfiguration, MacroTargets, DailySummary) in `frontend/src/types/index.ts`
+- [x] T001 Initialize React + TypeScript project with Vite in `frontend/` using `npm create vite@latest` with `react-ts` template
+- [x] T002 Install frontend dependencies: `react-router-dom`, `zustand`, `@tailwindcss/vite` in `frontend/`
+- [x] T003 Configure Tailwind CSS v4 in `frontend/tailwind.css` and add `@tailwindcss/vite` plugin to `frontend/vite.config.ts`
+- [x] T004 Configure path aliases (`@/*` → `./src/*`) in `frontend/tsconfig.app.json` and `frontend/vite.config.ts`
+- [x] T005 [P] Initialize Azure Functions v4 TypeScript project in `api/` with `@azure/functions` v4 dependency
+- [x] T006 [P] Create `frontend/public/staticwebapp.config.json` with SPA navigation fallback and asset exclusions
+- [x] T007 Define shared TypeScript types (FoodEntry, AIParseItem, AIParseResult, UserConfiguration, MacroTargets, DailySummary) in `frontend/src/types/index.ts`
 
 ---
 
@@ -40,18 +40,18 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T008 Create Zustand settings store with `persist` middleware in `frontend/src/hooks/useSettings.ts` — store UserConfiguration fields (claudeApiKey, googleClientId, googleClientSecret, spreadsheetId, tokens, macroTargets) in localStorage
-- [ ] T009 [P] Create base API client with fetch wrapper in `frontend/src/services/api.ts` — handles POST to `/api/*` endpoints, returns typed responses, surfaces errors
-- [ ] T010 [P] Create Google Sheets service in `frontend/src/services/sheets.ts` — direct browser fetch to Google Sheets API for read (GET values), write (insert at row 2 via batchUpdate), check sheet existence, and create Log sheet with headers
-- [ ] T011 [P] Create OAuth service in `frontend/src/services/oauth.ts` — build Google authorization URL with PKCE (code_verifier, code_challenge, state), extract auth code from redirect, call `/api/oauth/token` and `/api/oauth/refresh` via api.ts, proactive token refresh when < 5 min until expiry
-- [ ] T012 [P] Create Claude parse service in `frontend/src/services/claude.ts` — call `/api/parse` with apiKey and input, return typed AIParseResult
-- [ ] T013 Create app shell Layout component in `frontend/src/components/Layout.tsx` — nav bar with links to Food Log and Settings, responsive mobile/desktop layout with Tailwind
-- [ ] T014 Configure React Router v7 in `frontend/src/App.tsx` — `createBrowserRouter` with routes for `/` (FoodLog) and `/settings` (Settings), wrapped in Layout
-- [ ] T015 [P] Implement Azure Function `POST /api/parse` in `api/src/functions/parse.ts` — validate request body (apiKey, input), forward to Claude Messages API at `https://api.anthropic.com/v1/messages` with tool_use for `parse_food_items`, system prompt with nutrition estimation guidelines, return parsed items; handle 400/401/429/502 errors per contract
-- [ ] T016 [P] Implement Azure Function `POST /api/oauth/token` in `api/src/functions/oauthToken.ts` — validate request body (clientId, clientSecret, code, codeVerifier, redirectUri), POST to `https://oauth2.googleapis.com/token` with `grant_type=authorization_code`, return accessToken/refreshToken/expiresIn; handle 400/401/502 errors per contract
-- [ ] T017 [P] Implement Azure Function `POST /api/oauth/refresh` in `api/src/functions/oauthRefresh.ts` — validate request body (clientId, clientSecret, refreshToken), POST to `https://oauth2.googleapis.com/token` with `grant_type=refresh_token`, return accessToken/expiresIn; handle 400/401 (invalid_grant)/502 errors per contract
-- [ ] T018 Register all Azure Functions in `api/src/index.ts` — import parse, oauthToken, oauthRefresh function files
-- [ ] T019 Configure Vite dev server proxy in `frontend/vite.config.ts` — proxy `/api/*` requests to `http://localhost:7071` for local development
+- [x] T008 Create Zustand settings store with `persist` middleware in `frontend/src/hooks/useSettings.ts` — store UserConfiguration fields (claudeApiKey, googleClientId, googleClientSecret, spreadsheetId, tokens, macroTargets) in localStorage
+- [x] T009 [P] Create base API client with fetch wrapper in `frontend/src/services/api.ts` — handles POST to `/api/*` endpoints, returns typed responses, surfaces errors
+- [x] T010 [P] Create Google Sheets service in `frontend/src/services/sheets.ts` — direct browser fetch to Google Sheets API for read (GET values), write (insert at row 2 via batchUpdate), check sheet existence, and create Log sheet with headers
+- [x] T011 [P] Create OAuth service in `frontend/src/services/oauth.ts` — build Google authorization URL with PKCE (code_verifier, code_challenge, state), extract auth code from redirect, call `/api/oauth/token` and `/api/oauth/refresh` via api.ts, proactive token refresh when < 5 min until expiry
+- [x] T012 [P] Create Claude parse service in `frontend/src/services/claude.ts` — call `/api/parse` with apiKey and input, return typed AIParseResult
+- [x] T013 Create app shell Layout component in `frontend/src/components/Layout.tsx` — nav bar with links to Food Log and Settings, responsive mobile/desktop layout with Tailwind
+- [x] T014 Configure React Router v7 in `frontend/src/App.tsx` — `createBrowserRouter` with routes for `/` (FoodLog) and `/settings` (Settings), wrapped in Layout
+- [x] T015 [P] Implement Azure Function `POST /api/parse` in `api/src/functions/parse.ts` — validate request body (apiKey, input), forward to Claude Messages API at `https://api.anthropic.com/v1/messages` with tool_use for `parse_food_items`, system prompt with nutrition estimation guidelines, return parsed items; handle 400/401/429/502 errors per contract
+- [x] T016 [P] Implement Azure Function `POST /api/oauth/token` in `api/src/functions/oauthToken.ts` — validate request body (clientId, clientSecret, code, codeVerifier, redirectUri), POST to `https://oauth2.googleapis.com/token` with `grant_type=authorization_code`, return accessToken/refreshToken/expiresIn; handle 400/401/502 errors per contract
+- [x] T017 [P] Implement Azure Function `POST /api/oauth/refresh` in `api/src/functions/oauthRefresh.ts` — validate request body (clientId, clientSecret, refreshToken), POST to `https://oauth2.googleapis.com/token` with `grant_type=refresh_token`, return accessToken/expiresIn; handle 400/401 (invalid_grant)/502 errors per contract
+- [x] T018 Register all Azure Functions in `api/src/index.ts` — import parse, oauthToken, oauthRefresh function files
+- [x] T019 Configure Vite dev server proxy in `frontend/vite.config.ts` — proxy `/api/*` requests to `http://localhost:7071` for local development
 
 **Checkpoint**: Foundation ready — settings store, API services, Azure Functions, routing, and layout all in place. User story implementation can now begin.
 
@@ -65,12 +65,12 @@
 
 ### Implementation for User Story 1
 
-- [ ] T020 [US1] Create FoodInput component in `frontend/src/components/FoodInput.tsx` — text input field with submit button, loading state while parsing, disabled when no credentials configured
-- [ ] T021 [US1] Create ParseResult component in `frontend/src/components/ParseResult.tsx` — display list of AIParseItems with description, calories, protein, carbs, fat; show warning text inline for items with warnings (styled distinctly); confirm and cancel buttons
-- [ ] T022 [US1] Create useFoodLog hook in `frontend/src/hooks/useFoodLog.ts` — orchestrates the full flow: call claude.ts to parse input → hold AIParseResult in state → on confirm call sheets.ts to write each item as a row at row 2 (with local date, time, description, macros, raw input) → on success refresh entries from sheet → compute DailySummary by filtering today's entries
-- [ ] T023 [US1] Create MacroSummary component in `frontend/src/components/MacroSummary.tsx` — display daily totals (calories, protein, carbs, fat) in a card/grid layout, responsive for mobile; show macro targets alongside totals if configured in settings
-- [ ] T024 [US1] Build FoodLog page in `frontend/src/pages/FoodLog.tsx` — compose FoodInput, ParseResult, MacroSummary; wire to useFoodLog hook; redirect to `/settings` if credentials not configured (check useSettings store)
-- [ ] T025 [US1] Handle non-food input in FoodLog page — when all returned items have description "Not a food item" and zero macros, display the warning message as an error instead of showing ParseResult with confirm button
+- [x] T020 [US1] Create FoodInput component in `frontend/src/components/FoodInput.tsx` — text input field with submit button, loading state while parsing, disabled when no credentials configured
+- [x] T021 [US1] Create ParseResult component in `frontend/src/components/ParseResult.tsx` — display list of AIParseItems with description, calories, protein, carbs, fat; show warning text inline for items with warnings (styled distinctly); confirm and cancel buttons
+- [x] T022 [US1] Create useFoodLog hook in `frontend/src/hooks/useFoodLog.ts` — orchestrates the full flow: call claude.ts to parse input → hold AIParseResult in state → on confirm call sheets.ts to write each item as a row at row 2 (with local date, time, description, macros, raw input) → on success refresh entries from sheet → compute DailySummary by filtering today's entries
+- [x] T023 [US1] Create MacroSummary component in `frontend/src/components/MacroSummary.tsx` — display daily totals (calories, protein, carbs, fat) in a card/grid layout, responsive for mobile; show macro targets alongside totals if configured in settings
+- [x] T024 [US1] Build FoodLog page in `frontend/src/pages/FoodLog.tsx` — compose FoodInput, ParseResult, MacroSummary; wire to useFoodLog hook; redirect to `/settings` if credentials not configured (check useSettings store)
+- [x] T025 [US1] Handle non-food input in FoodLog page — when all returned items have description "Not a food item" and zero macros, display the warning message as an error instead of showing ParseResult with confirm button
 
 **Checkpoint**: User Story 1 is fully functional. Users can type food, see parsed macros with warnings, confirm, and entries are written to Google Sheets. Daily totals compute from sheet data.
 
@@ -84,12 +84,12 @@
 
 ### Implementation for User Story 2
 
-- [ ] T026 [US2] Create OnboardingGuide component in `frontend/src/components/OnboardingGuide.tsx` — step-by-step instructions for Google Cloud project setup: create project, enable Sheets API, configure OAuth consent screen (set to "In production" to avoid 7-day token expiry), create Web Application credentials, add redirect URI, copy client ID/secret; collapsible/expandable sections
-- [ ] T027 [US2] Create useGoogleAuth hook in `frontend/src/hooks/useGoogleAuth.ts` — initiate OAuth flow (build auth URL with PKCE, scope `https://www.googleapis.com/auth/spreadsheets`, access_type=offline, prompt=consent, state for CSRF), handle redirect callback (extract code from URL, validate state, call oauth.ts token exchange, store tokens in settings), expose connect/disconnect actions and connection status
-- [ ] T028 [US2] Build Settings page in `frontend/src/pages/Settings.tsx` — form fields for Claude API key (with `sk-ant-` format hint), Google OAuth client ID, client secret, spreadsheet ID (with URL extraction helper); Google OAuth connect/disconnect button wired to useGoogleAuth; macro targets inputs (calories, protein, carbs, fat); save to useSettings store; show connection status indicators; embed OnboardingGuide
-- [ ] T029 [US2] Implement spreadsheet ID extraction from URL — in Settings page or useSettings, parse `https://docs.google.com/spreadsheets/d/{ID}/edit` format and store just the ID
-- [ ] T030 [US2] Implement Log sheet auto-creation in `frontend/src/services/sheets.ts` — before first write, check if "Log" sheet exists in spreadsheet; if not, create it via batchUpdate addSheet request, then write header row ("Date", "Time", "Description", "Calories", "Protein (g)", "Carbs (g)", "Fat (g)", "Raw Input") to A1:H1
-- [ ] T031 [US2] Add credential validation feedback in Settings page — on save, validate Claude API key format (starts with `sk-ant-`), validate spreadsheet ID is non-empty, show green/red status indicators; optionally test spreadsheet access by reading sheet metadata
+- [x] T026 [US2] Create OnboardingGuide component in `frontend/src/components/OnboardingGuide.tsx` — step-by-step instructions for Google Cloud project setup: create project, enable Sheets API, configure OAuth consent screen (set to "In production" to avoid 7-day token expiry), create Web Application credentials, add redirect URI, copy client ID/secret; collapsible/expandable sections
+- [x] T027 [US2] Create useGoogleAuth hook in `frontend/src/hooks/useGoogleAuth.ts` — initiate OAuth flow (build auth URL with PKCE, scope `https://www.googleapis.com/auth/spreadsheets`, access_type=offline, prompt=consent, state for CSRF), handle redirect callback (extract code from URL, validate state, call oauth.ts token exchange, store tokens in settings), expose connect/disconnect actions and connection status
+- [x] T028 [US2] Build Settings page in `frontend/src/pages/Settings.tsx` — form fields for Claude API key (with `sk-ant-` format hint), Google OAuth client ID, client secret, spreadsheet ID (with URL extraction helper); Google OAuth connect/disconnect button wired to useGoogleAuth; macro targets inputs (calories, protein, carbs, fat); save to useSettings store; show connection status indicators; embed OnboardingGuide
+- [x] T029 [US2] Implement spreadsheet ID extraction from URL — in Settings page or useSettings, parse `https://docs.google.com/spreadsheets/d/{ID}/edit` format and store just the ID
+- [x] T030 [US2] Implement Log sheet auto-creation in `frontend/src/services/sheets.ts` — before first write, check if "Log" sheet exists in spreadsheet; if not, create it via batchUpdate addSheet request, then write header row ("Date", "Time", "Description", "Calories", "Protein (g)", "Carbs (g)", "Fat (g)", "Raw Input") to A1:H1
+- [x] T031 [US2] Add credential validation feedback in Settings page — on save, validate Claude API key format (starts with `sk-ant-`), validate spreadsheet ID is non-empty, show green/red status indicators; optionally test spreadsheet access by reading sheet metadata
 
 **Checkpoint**: User Story 2 is fully functional. Users can configure all credentials, complete OAuth, and the app auto-creates the Log sheet on first use.
 
@@ -103,9 +103,9 @@
 
 ### Implementation for User Story 3
 
-- [ ] T032 [US3] Create EntryHistory component in `frontend/src/components/EntryHistory.tsx` — list of today's FoodEntry items showing time (formatted to browser local time), description, and individual macro values (calories, protein, carbs, fat); empty state message when no entries today
-- [ ] T033 [US3] Extend useFoodLog hook in `frontend/src/hooks/useFoodLog.ts` — add `loadTodaysEntries` function that reads all rows from sheet, filters by date column matching today's local date (YYYY-MM-DD), parses into FoodEntry array, computes DailySummary; call on page mount and after successful writes
-- [ ] T034 [US3] Integrate EntryHistory into FoodLog page in `frontend/src/pages/FoodLog.tsx` — render below MacroSummary, show today's entries from useFoodLog state; display empty state when no entries
+- [x] T032 [US3] Create EntryHistory component in `frontend/src/components/EntryHistory.tsx` — list of today's FoodEntry items showing time (formatted to browser local time), description, and individual macro values (calories, protein, carbs, fat); empty state message when no entries today
+- [x] T033 [US3] Extend useFoodLog hook in `frontend/src/hooks/useFoodLog.ts` — add `loadTodaysEntries` function that reads all rows from sheet, filters by date column matching today's local date (YYYY-MM-DD), parses into FoodEntry array, computes DailySummary; call on page mount and after successful writes
+- [x] T034 [US3] Integrate EntryHistory into FoodLog page in `frontend/src/pages/FoodLog.tsx` — render below MacroSummary, show today's entries from useFoodLog state; display empty state when no entries
 
 **Checkpoint**: User Story 3 is fully functional. Users see accurate daily totals and a history of today's entries on the home page.
 
@@ -119,9 +119,9 @@
 
 ### Implementation for User Story 4
 
-- [ ] T035 [US4] Extend useFoodLog hook in `frontend/src/hooks/useFoodLog.ts` — add write error state (preserve AIParseResult when sheets.ts write fails), add retry function that re-attempts the write with the preserved data, add dismiss function to clear the failed state; handle 429 rate limit errors with "please wait" messaging
-- [ ] T036 [US4] Extend ParseResult component in `frontend/src/components/ParseResult.tsx` — add error state display: show error message (network error, rate limit, or auth error), keep macro data visible, render retry button and dismiss button; for 401 errors show "re-authorize in settings" link
-- [ ] T037 [US4] Handle token refresh during write in `frontend/src/hooks/useFoodLog.ts` — if sheet write returns 401, attempt proactive token refresh via oauth.ts before showing error; if refresh succeeds, auto-retry the write; if refresh fails (invalid_grant), show re-authorize error
+- [x] T035 [US4] Extend useFoodLog hook in `frontend/src/hooks/useFoodLog.ts` — add write error state (preserve AIParseResult when sheets.ts write fails), add retry function that re-attempts the write with the preserved data, add dismiss function to clear the failed state; handle 429 rate limit errors with "please wait" messaging
+- [x] T036 [US4] Extend ParseResult component in `frontend/src/components/ParseResult.tsx` — add error state display: show error message (network error, rate limit, or auth error), keep macro data visible, render retry button and dismiss button; for 401 errors show "re-authorize in settings" link
+- [x] T037 [US4] Handle token refresh during write in `frontend/src/hooks/useFoodLog.ts` — if sheet write returns 401, attempt proactive token refresh via oauth.ts before showing error; if refresh succeeds, auto-retry the write; if refresh fails (invalid_grant), show re-authorize error
 
 **Checkpoint**: User Story 4 is fully functional. Failed writes preserve parsed data, offer retry, and handle token expiry gracefully.
 
@@ -131,10 +131,10 @@
 
 **Purpose**: Error handling, edge cases, and mobile responsiveness across all stories
 
-- [ ] T038 Add global error boundary in `frontend/src/App.tsx` — catch unhandled React errors, display friendly fallback UI
-- [ ] T039 Add credential missing/invalid error handling across FoodLog page — if Claude API key missing or sheets not connected, show clear message directing to Settings page (FR-014)
-- [ ] T040 [P] Add mobile-responsive styling pass across all components — verify no horizontal scrolling, tap targets are usable, MacroSummary and EntryHistory render well on small screens (SC-006)
-- [ ] T041 [P] Add loading states and disabled submit during in-flight requests in FoodInput and Settings page — prevent double submissions
+- [x] T038 Add global error boundary in `frontend/src/App.tsx` — catch unhandled React errors, display friendly fallback UI
+- [x] T039 Add credential missing/invalid error handling across FoodLog page — if Claude API key missing or sheets not connected, show clear message directing to Settings page (FR-014)
+- [x] T040 [P] Add mobile-responsive styling pass across all components — verify no horizontal scrolling, tap targets are usable, MacroSummary and EntryHistory render well on small screens (SC-006)
+- [x] T041 [P] Add loading states and disabled submit during in-flight requests in FoodInput and Settings page — prevent double submissions
 - [ ] T042 Run quickstart.md validation — follow all steps in `specs/001-macro-nutrition-logger/quickstart.md` and verify end-to-end flow works
 
 ---
