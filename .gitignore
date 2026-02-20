@@ -1,0 +1,50 @@
+# Build outputs
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# IDE/tooling
+.vs/
+.idea/
+.vscode/
+
+# .NET / NuGet
+*.nupkg
+*.snupkg
+*.nuspec
+packages/
+!packages/build/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Logs
+*.log
+logs/
+
+# Test results
+[Tt]est[Rr]esult*/
+[Bb]enchmark[Dd]ot[Nn]et.Artifacts/
+
+# MAUI / Xamarin / mobile artifacts
+*.apk
+*.aab
+*.ipa
+*.app
+*.dSYM/
+*.xcuserstate
+*.xcodeproj/project.xcworkspace/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+
+# OS files
+.DS_Store
+Thumbs.db
