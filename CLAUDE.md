@@ -3,6 +3,8 @@
 Auto-generated from all feature plans. Last updated: 2026-02-20
 
 ## Active Technologies
+- TypeScript 5.9, Node.js 20 LTS + Vitest 3.x, @testing-library/react, happy-dom (002-test-suite)
+- N/A (test-only feature) (002-test-suite)
 
 - TypeScript 5.x, Node.js 20 LTS + React 19, Vite, React Router v7, Zustand, Tailwind CSS v4, Azure Functions v4 (Node.js model) (001-macro-nutrition-logger)
 
@@ -30,6 +32,7 @@ npm test && npm run lint
 TypeScript 5.x, Node.js 20 LTS: Follow standard conventions
 
 ## Recent Changes
+- 002-test-suite: Added TypeScript 5.9, Node.js 20 LTS + Vitest 3.x, @testing-library/react, happy-dom
 
 - 001-macro-nutrition-logger: Added TypeScript 5.x, Node.js 20 LTS + React 19, Vite, React Router v7, Zustand, Tailwind CSS v4, Azure Functions v4 (Node.js model)
 

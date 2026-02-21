@@ -6,12 +6,14 @@
   "scripts": {
     "build": "tsc",
     "start": "func start",
-    "dev": "npm run build && func start"
+    "dev": "npm run build && func start",
+    "test": "vitest --run"
   },
   "dependencies": {
     "@azure/functions": "^4.6.0"
   },
   "devDependencies": {
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "vitest": "^3.2.4"
   }
 }

@@ -4,7 +4,7 @@ const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token';
 
 const REQUIRED_FIELDS = ['clientId', 'clientSecret', 'refreshToken'] as const;
 
-async function oauthRefreshHandler(
+export async function oauthRefreshHandler(
   request: HttpRequest,
   _context: InvocationContext,
 ): Promise<HttpResponseInit> {
