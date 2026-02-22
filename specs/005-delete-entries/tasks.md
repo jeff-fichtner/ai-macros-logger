@@ -17,11 +17,11 @@
 
 **Purpose**: Type and service-level changes that both user stories depend on
 
-- [ ] T001 Add `sheetRow: number` field to `FoodEntry` interface in `frontend/src/types/index.ts`
-- [ ] T002 Update `readAllEntries` in `frontend/src/services/sheets.ts` to assign `sheetRow` to each entry (sheetRow = arrayIndex + 1, 0-based, where arrayIndex is 0-based within `rows.slice(1)` — row 0 is header, row 1 is first data row). This value is passed directly to `deleteDimension` as `startIndex`.
-- [ ] T003 Update `DEFAULTS` record in `frontend/src/services/sheets.ts` to include `sheetRow: 0`
-- [ ] T004 Add `getLogSheetId` helper in `frontend/src/services/sheets.ts` that fetches spreadsheet metadata with `fields=sheets.properties(title,sheetId)` and returns the numeric `sheetId` for the "Log" sheet (throw `SheetsApiError` if not found)
-- [ ] T005 Add `deleteEntries` function in `frontend/src/services/sheets.ts` that accepts `spreadsheetId`, `accessToken`, and `sheetRows: number[]`; calls `getLogSheetId` to get the numeric sheet ID; builds `deleteDimension` requests sorted in descending row order (to avoid index shift); sends a single `batchUpdate` POST to `spreadsheets/{id}:batchUpdate`
+- [X] T001 Add `sheetRow: number` field to `FoodEntry` interface in `frontend/src/types/index.ts`
+- [X] T002 Update `readAllEntries` in `frontend/src/services/sheets.ts` to assign `sheetRow` to each entry (sheetRow = arrayIndex + 1, 0-based, where arrayIndex is 0-based within `rows.slice(1)` — row 0 is header, row 1 is first data row). This value is passed directly to `deleteDimension` as `startIndex`.
+- [X] T003 Update `DEFAULTS` record in `frontend/src/services/sheets.ts` to include `sheetRow: 0`
+- [X] T004 Add `getLogSheetId` helper in `frontend/src/services/sheets.ts` that fetches spreadsheet metadata with `fields=sheets.properties(title,sheetId)` and returns the numeric `sheetId` for the "Log" sheet (throw `SheetsApiError` if not found)
+- [X] T005 Add `deleteEntries` function in `frontend/src/services/sheets.ts` that accepts `spreadsheetId`, `accessToken`, and `sheetRows: number[]`; calls `getLogSheetId` to get the numeric sheet ID; builds `deleteDimension` requests sorted in descending row order (to avoid index shift); sends a single `batchUpdate` POST to `spreadsheets/{id}:batchUpdate`
 
 **Checkpoint**: Type and service layer ready — both user stories can now be implemented
 
@@ -35,12 +35,12 @@
 
 ### Implementation for User Story 1
 
-- [ ] T006 [US1] Add `deleteGroup` callback in `frontend/src/hooks/useFoodLog.ts` that accepts a `groupId: string`, collects `sheetRow` values from all entries with that `group_id`, calls `deleteEntries` from sheets service, then calls `loadTodaysEntries` to refresh state. Include 401 retry with token refresh (same pattern as `confirm`).
-- [ ] T007 [US1] Add `deleteError` state (`string | null`) to `useFoodLog` hook in `frontend/src/hooks/useFoodLog.ts` and expose it in the return object. Set it on deletion failure, clear it on successful deletion or new deletion attempt.
-- [ ] T008 [US1] Add a `deleting` status value to the `Status` type union in `frontend/src/hooks/useFoodLog.ts` (becomes `'idle' | 'parsing' | 'writing' | 'loading' | 'deleting'`)
-- [ ] T009 [US1] Add delete button to the meal group header row in `frontend/src/components/EntryHistory.tsx` — a small X/trash button next to the meal label. On click, call `window.confirm('Delete this entire meal?')` and if confirmed, invoke `onDeleteGroup(group.group_id)`.
-- [ ] T010 [US1] Update `EntryHistoryProps` in `frontend/src/components/EntryHistory.tsx` to accept `onDeleteGroup: (groupId: string) => void`, `deleting: boolean`, and `deleteError: string | null`. Show inline error message when `deleteError` is set. Disable delete buttons while `deleting` is true.
-- [ ] T011 [US1] Wire `deleteGroup`, `deleteError`, and `deleting` status from `useFoodLog` hook into `EntryHistory` component in `frontend/src/pages/FoodLog.tsx`
+- [X] T006 [US1] Add `deleteGroup` callback in `frontend/src/hooks/useFoodLog.ts` that accepts a `groupId: string`, collects `sheetRow` values from all entries with that `group_id`, calls `deleteEntries` from sheets service, then calls `loadTodaysEntries` to refresh state. Include 401 retry with token refresh (same pattern as `confirm`).
+- [X] T007 [US1] Add `deleteError` state (`string | null`) to `useFoodLog` hook in `frontend/src/hooks/useFoodLog.ts` and expose it in the return object. Set it on deletion failure, clear it on successful deletion or new deletion attempt.
+- [X] T008 [US1] Add a `deleting` status value to the `Status` type union in `frontend/src/hooks/useFoodLog.ts` (becomes `'idle' | 'parsing' | 'writing' | 'loading' | 'deleting'`)
+- [X] T009 [US1] Add delete button to the meal group header row in `frontend/src/components/EntryHistory.tsx` — a small X/trash button next to the meal label. On click, call `window.confirm('Delete this entire meal?')` and if confirmed, invoke `onDeleteGroup(group.group_id)`.
+- [X] T010 [US1] Update `EntryHistoryProps` in `frontend/src/components/EntryHistory.tsx` to accept `onDeleteGroup: (groupId: string) => void`, `deleting: boolean`, and `deleteError: string | null`. Show inline error message when `deleteError` is set. Disable delete buttons while `deleting` is true.
+- [X] T011 [US1] Wire `deleteGroup`, `deleteError`, and `deleting` status from `useFoodLog` hook into `EntryHistory` component in `frontend/src/pages/FoodLog.tsx`
 
 **Checkpoint**: Meal group deletion is fully functional and testable independently
 
@@ -54,10 +54,10 @@
 
 ### Implementation for User Story 2
 
-- [ ] T012 [US2] Add `deleteEntry` callback in `frontend/src/hooks/useFoodLog.ts` that accepts a single `sheetRow: number`, calls `deleteEntries` with `[sheetRow]`, then calls `loadTodaysEntries` to refresh. Include 401 retry with token refresh.
-- [ ] T013 [US2] Add per-item delete button in `frontend/src/components/EntryHistory.tsx` — a small X button on each entry row. On click, call `window.confirm('Delete this entry?')` and if confirmed, invoke `onDeleteEntry(entry.sheetRow)`.
-- [ ] T014 [US2] Update `EntryHistoryProps` in `frontend/src/components/EntryHistory.tsx` to accept `onDeleteEntry: (sheetRow: number) => void`
-- [ ] T015 [US2] Wire `deleteEntry` from `useFoodLog` hook into `EntryHistory` component in `frontend/src/pages/FoodLog.tsx`
+- [X] T012 [US2] Add `deleteEntry` callback in `frontend/src/hooks/useFoodLog.ts` that accepts a single `sheetRow: number`, calls `deleteEntries` with `[sheetRow]`, then calls `loadTodaysEntries` to refresh. Include 401 retry with token refresh.
+- [X] T013 [US2] Add per-item delete button in `frontend/src/components/EntryHistory.tsx` — a small X button on each entry row. On click, call `window.confirm('Delete this entry?')` and if confirmed, invoke `onDeleteEntry(entry.sheetRow)`.
+- [X] T014 [US2] Update `EntryHistoryProps` in `frontend/src/components/EntryHistory.tsx` to accept `onDeleteEntry: (sheetRow: number) => void`
+- [X] T015 [US2] Wire `deleteEntry` from `useFoodLog` hook into `EntryHistory` component in `frontend/src/pages/FoodLog.tsx`
 
 **Checkpoint**: Both meal group and individual entry deletion work independently. FR-010 (last item removes group) is handled automatically by `loadTodaysEntries` refresh.
 
@@ -67,9 +67,9 @@
 
 **Purpose**: Validation, cleanup, and test fixes
 
-- [ ] T016 Run TypeScript type check (`cd frontend && npx tsc --noEmit`) and fix any type errors
-- [ ] T017 Run existing test suite (`cd frontend && npx vitest run`) and fix any broken tests caused by the new `sheetRow` field on `FoodEntry` (update test helpers like `makeEntry` in `frontend/src/utils/entryTime.test.ts` and mock data in `frontend/src/hooks/useFoodLog.test.ts` and `frontend/src/services/sheets.test.ts`)
-- [ ] T018 Run linter (`cd frontend && npm run lint`) and fix any lint errors
+- [X] T016 Run TypeScript type check (`cd frontend && npx tsc --noEmit`) and fix any type errors
+- [X] T017 Run existing test suite (`cd frontend && npx vitest run`) and fix any broken tests caused by the new `sheetRow` field on `FoodEntry` (update test helpers like `makeEntry` in `frontend/src/utils/entryTime.test.ts` and mock data in `frontend/src/hooks/useFoodLog.test.ts` and `frontend/src/services/sheets.test.ts`)
+- [X] T018 Run linter (`cd frontend && npm run lint`) and fix any lint errors
 
 ---
 

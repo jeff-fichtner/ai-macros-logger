@@ -62,6 +62,7 @@ describe("readAllEntries", () => {
       group_id: "g1",
       meal_label: "Lunch",
       utc_offset: "-08:00",
+      sheetRow: 1,
     });
   });
 
@@ -88,6 +89,7 @@ describe("readAllEntries", () => {
       group_id: "",
       meal_label: "",
       utc_offset: "",
+      sheetRow: 1,
     });
   });
 
@@ -129,6 +131,7 @@ describe("readAllEntries", () => {
       group_id: "",
       meal_label: "",
       utc_offset: "",
+      sheetRow: 1,
     });
   });
 

@@ -10,6 +10,7 @@ export interface FoodEntry {
   group_id: string;
   meal_label: string;
   utc_offset: string;
+  sheetRow: number;
 }
 
 export interface DailySummary {

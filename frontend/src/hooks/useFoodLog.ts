@@ -1,12 +1,12 @@
 import { useState, useCallback } from 'react';
 import type { AIParseResult, FoodEntry, DailySummary, WriteError } from '@/types';
 import { parseFood } from '@/services/parse';
-import { readAllEntries, writeEntries, ensureLogSheet, SheetsApiError } from '@/services/sheets';
+import { readAllEntries, writeEntries, ensureLogSheet, deleteEntries, SheetsApiError } from '@/services/sheets';
 import { refreshToken } from '@/services/oauth';
 import { useSettings } from '@/hooks/useSettings';
-import { parseEntryTimestamp, formatLocalDate, formatLocalTime } from '@/utils/entryTime';
+import { parseEntryTimestamp, formatLocalDate } from '@/utils/entryTime';
 
-type Status = 'idle' | 'parsing' | 'writing' | 'loading';
+type Status = 'idle' | 'parsing' | 'writing' | 'loading' | 'deleting';
 
 export function useFoodLog() {
   const settings = useSettings();
@@ -19,6 +19,7 @@ export function useFoodLog() {
   const [error, setError] = useState<string | null>(null);
   const [writeError, setWriteError] = useState<WriteError | null>(null);
   const [lastAteAt, setLastAteAt] = useState<Date | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const todayStr = () => {
     const now = new Date();
@@ -134,6 +135,7 @@ export function useFoodLog() {
       group_id: groupId,
       meal_label: mealLabel,
       utc_offset: offset,
+      sheetRow: 0,
     }));
 
     await writeEntries(settings.spreadsheetId, accessToken, foodEntries);
@@ -205,6 +207,81 @@ export function useFoodLog() {
     setWriteError(null);
   }, []);
 
+  const attemptDelete = useCallback(async (sheetRows: number[], accessToken: string) => {
+    await deleteEntries(settings.spreadsheetId, accessToken, sheetRows);
+  }, [settings.spreadsheetId]);
+
+  const deleteGroup = useCallback(async (groupId: string) => {
+    const rows = entries.filter((e) => e.group_id === groupId).map((e) => e.sheetRow);
+    if (rows.length === 0) return;
+
+    setStatus('deleting');
+    setDeleteError(null);
+    try {
+      await attemptDelete(rows, settings.googleAccessToken);
+      await loadTodaysEntries();
+    } catch (err) {
+      const status = err instanceof SheetsApiError ? err.status : 0;
+
+      if (status === 401 && settings.googleRefreshToken) {
+        try {
+          const result = await refreshToken({
+            clientId: settings.googleClientId,
+            clientSecret: settings.googleClientSecret,
+            refreshToken: settings.googleRefreshToken,
+          });
+          settings.updateAccessToken(result.accessToken, result.expiresIn);
+
+          await attemptDelete(rows, result.accessToken);
+          await loadTodaysEntries();
+          return;
+        } catch {
+          setDeleteError('Google authorization expired. Please re-authorize in Settings.');
+          setStatus('idle');
+          return;
+        }
+      }
+
+      setDeleteError(err instanceof Error ? err.message : 'Failed to delete entries');
+    } finally {
+      setStatus('idle');
+    }
+  }, [entries, settings, attemptDelete, loadTodaysEntries]);
+
+  const deleteEntry = useCallback(async (sheetRow: number) => {
+    setStatus('deleting');
+    setDeleteError(null);
+    try {
+      await attemptDelete([sheetRow], settings.googleAccessToken);
+      await loadTodaysEntries();
+    } catch (err) {
+      const status = err instanceof SheetsApiError ? err.status : 0;
+
+      if (status === 401 && settings.googleRefreshToken) {
+        try {
+          const result = await refreshToken({
+            clientId: settings.googleClientId,
+            clientSecret: settings.googleClientSecret,
+            refreshToken: settings.googleRefreshToken,
+          });
+          settings.updateAccessToken(result.accessToken, result.expiresIn);
+
+          await attemptDelete([sheetRow], result.accessToken);
+          await loadTodaysEntries();
+          return;
+        } catch {
+          setDeleteError('Google authorization expired. Please re-authorize in Settings.');
+          setStatus('idle');
+          return;
+        }
+      }
+
+      setDeleteError(err instanceof Error ? err.message : 'Failed to delete entry');
+    } finally {
+      setStatus('idle');
+    }
+  }, [settings, attemptDelete, loadTodaysEntries]);
+
   return {
     status,
     parseResult,
@@ -212,12 +289,15 @@ export function useFoodLog() {
     summary,
     error,
     writeError,
+    deleteError,
     lastAteAt,
     parse,
     confirm,
     retry,
     dismiss,
     cancel,
+    deleteGroup,
+    deleteEntry,
     loadTodaysEntries,
   };
 }

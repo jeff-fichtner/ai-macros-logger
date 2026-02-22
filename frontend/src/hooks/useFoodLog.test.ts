@@ -17,6 +17,7 @@ vi.mock('@/services/sheets', async (importOriginal) => {
     readAllEntries: vi.fn(),
     writeEntries: vi.fn(),
     ensureLogSheet: vi.fn(),
+    deleteEntries: vi.fn(),
   };
 });
 
@@ -238,8 +239,8 @@ describe('useFoodLog', () => {
 
   it('loadTodaysEntries filters by today date and computes summary', async () => {
     mockReadAllEntries.mockResolvedValueOnce([
-      { date: '2026-02-21', time: '12:00 PM', description: 'Chicken', calories: 300, protein_g: 30, carbs_g: 0, fat_g: 10, raw_input: 'chicken', group_id: 'g1', meal_label: 'Lunch', utc_offset: '-08:00' },
-      { date: '2026-02-20', time: '10:00 AM', description: 'Rice', calories: 200, protein_g: 5, carbs_g: 40, fat_g: 2, raw_input: 'rice', group_id: 'g2', meal_label: 'Dinner', utc_offset: '-08:00' },
+      { date: '2026-02-21', time: '12:00 PM', description: 'Chicken', calories: 300, protein_g: 30, carbs_g: 0, fat_g: 10, raw_input: 'chicken', group_id: 'g1', meal_label: 'Lunch', utc_offset: '-08:00', sheetRow: 1 },
+      { date: '2026-02-20', time: '10:00 AM', description: 'Rice', calories: 200, protein_g: 5, carbs_g: 40, fat_g: 2, raw_input: 'rice', group_id: 'g2', meal_label: 'Dinner', utc_offset: '-08:00', sheetRow: 2 },
     ]);
 
     const { result } = renderHook(() => useFoodLog());

@@ -11,7 +11,7 @@ import EntryHistory from '@/components/EntryHistory';
 export default function FoodLog() {
   const settings = useSettings();
   const navigate = useNavigate();
-  const { status, parseResult, entries, summary, error, writeError, lastAteAt, parse, confirm, retry, dismiss, cancel, loadTodaysEntries } = useFoodLog();
+  const { status, parseResult, entries, summary, error, writeError, deleteError, lastAteAt, parse, confirm, retry, dismiss, cancel, deleteGroup, deleteEntry, loadTodaysEntries } = useFoodLog();
 
   const configured = settings.isConfigured();
   const connected = settings.isGoogleConnected();
@@ -107,7 +107,13 @@ export default function FoodLog() {
         </p>
       )}
 
-      <EntryHistory entries={entries} />
+      <EntryHistory
+        entries={entries}
+        onDeleteGroup={deleteGroup}
+        onDeleteEntry={deleteEntry}
+        deleting={status === 'deleting'}
+        deleteError={deleteError}
+      />
     </div>
   );
 }

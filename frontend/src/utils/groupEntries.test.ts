@@ -14,6 +14,8 @@ function entry(overrides: Partial<FoodEntry> = {}): FoodEntry {
     raw_input: 'chicken',
     group_id: '',
     meal_label: '',
+    utc_offset: '',
+    sheetRow: 0,
     ...overrides,
   };
 }

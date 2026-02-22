@@ -15,6 +15,7 @@ function makeEntry(overrides: Partial<FoodEntry> = {}): FoodEntry {
     group_id: '',
     meal_label: '',
     utc_offset: '-08:00',
+    sheetRow: 0,
     ...overrides,
   };
 }

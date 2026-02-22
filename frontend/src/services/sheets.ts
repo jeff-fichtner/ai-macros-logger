@@ -53,6 +53,7 @@ const DEFAULTS: Record<keyof FoodEntry, string | number> = {
   date: "", time: "", description: "",
   calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0,
   raw_input: "", group_id: "", meal_label: "", utc_offset: "",
+  sheetRow: 0,
 };
 
 function authHeaders(accessToken: string): HeadersInit {
@@ -108,12 +109,13 @@ export async function readAllEntries(
     if (key) colIndex.set(key, i);
   });
 
-  return rows.slice(1).map((row) => {
+  return rows.slice(1).map((row, arrayIndex) => {
     const entry = { ...DEFAULTS } as Record<keyof FoodEntry, string | number>;
     for (const [key, idx] of colIndex) {
       const raw = row[idx] ?? "";
       entry[key] = NUMERIC_KEYS.has(key) ? (Number(raw) || 0) : raw;
     }
+    entry.sheetRow = arrayIndex + 1; // 0-based: row 0 = header, row 1 = first data row
     return entry as unknown as FoodEntry;
   });
 }
@@ -229,4 +231,55 @@ export async function ensureLogSheet(
     body: JSON.stringify({ values: [missingHeaders] }),
   });
   await ensureOk(migrateResponse);
+}
+
+export async function getLogSheetId(
+  spreadsheetId: string,
+  accessToken: string,
+): Promise<number> {
+  const url = `${SHEETS_BASE}/${spreadsheetId}?fields=sheets.properties(title,sheetId)`;
+  const response = await fetch(url, {
+    headers: authHeaders(accessToken),
+  });
+  await ensureOk(response);
+
+  const data = await response.json();
+  const sheets: { properties: { title: string; sheetId: number } }[] = data.sheets ?? [];
+  const logSheet = sheets.find((s) => s.properties.title === "Log");
+  if (!logSheet) {
+    throw new SheetsApiError(0, 'Sheet "Log" not found in spreadsheet');
+  }
+  return logSheet.properties.sheetId;
+}
+
+export async function deleteEntries(
+  spreadsheetId: string,
+  accessToken: string,
+  sheetRows: number[],
+): Promise<void> {
+  if (sheetRows.length === 0) return;
+
+  const sheetId = await getLogSheetId(spreadsheetId, accessToken);
+
+  // Sort descending to avoid index shift during sequential execution
+  const sorted = [...sheetRows].sort((a, b) => b - a);
+
+  const requests = sorted.map((row) => ({
+    deleteDimension: {
+      range: {
+        sheetId,
+        dimension: "ROWS",
+        startIndex: row,
+        endIndex: row + 1,
+      },
+    },
+  }));
+
+  const url = `${SHEETS_BASE}/${spreadsheetId}:batchUpdate`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: authHeaders(accessToken),
+    body: JSON.stringify({ requests }),
+  });
+  await ensureOk(response);
 }
