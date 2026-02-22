@@ -1,4 +1,4 @@
-import { TOOL_SCHEMA, type FoodItem, type ProviderHandler } from "./types.js";
+import { TOOL_SCHEMA, type FoodItem, type ParseResult, type ProviderHandler } from "./types.js";
 
 const CLAUDE_API_URL = "https://api.anthropic.com/v1/messages";
 
@@ -6,7 +6,7 @@ interface ClaudeToolUseBlock {
   type: "tool_use";
   id: string;
   name: string;
-  input: { items: FoodItem[] };
+  input: { meal_label?: string; items: FoodItem[] };
 }
 
 interface ClaudeContentBlock {
@@ -92,5 +92,8 @@ export const callProvider: ProviderHandler = async (
     );
   }
 
-  return toolUseBlock.input.items;
+  return {
+    meal_label: toolUseBlock.input.meal_label || "Meal",
+    items: toolUseBlock.input.items,
+  };
 };

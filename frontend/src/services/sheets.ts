@@ -11,7 +11,49 @@ const HEADERS = [
   "Carbs (g)",
   "Fat (g)",
   "Raw Input",
+  "Group ID",
+  "Meal Label",
+  "UTC Offset",
 ];
+
+/** Convert 1-based column number to spreadsheet column letter(s). 1→A, 26→Z, 27→AA */
+export function columnLetter(n: number): string {
+  let result = "";
+  while (n > 0) {
+    n--;
+    result = String.fromCharCode(65 + (n % 26)) + result;
+    n = Math.floor(n / 26);
+  }
+  return result;
+}
+
+const LAST_COL = columnLetter(HEADERS.length);
+const LOG_RANGE = `Log!A:${LAST_COL}`;
+const LOG_HEADER_RANGE = `Log!A1:${LAST_COL}1`;
+
+const HEADER_TO_KEY: Record<string, keyof FoodEntry> = {
+  "Date": "date",
+  "Time": "time",
+  "Description": "description",
+  "Calories": "calories",
+  "Protein (g)": "protein_g",
+  "Carbs (g)": "carbs_g",
+  "Fat (g)": "fat_g",
+  "Raw Input": "raw_input",
+  "Group ID": "group_id",
+  "Meal Label": "meal_label",
+  "UTC Offset": "utc_offset",
+};
+
+const NUMERIC_KEYS: Set<keyof FoodEntry> = new Set([
+  "calories", "protein_g", "carbs_g", "fat_g",
+]);
+
+const DEFAULTS: Record<keyof FoodEntry, string | number> = {
+  date: "", time: "", description: "",
+  calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0,
+  raw_input: "", group_id: "", meal_label: "", utc_offset: "",
+};
 
 function authHeaders(accessToken: string): HeadersInit {
   return {
@@ -40,7 +82,7 @@ export async function readAllEntries(
   spreadsheetId: string,
   accessToken: string,
 ): Promise<FoodEntry[]> {
-  const url = `${SHEETS_BASE}/${spreadsheetId}/values/Log!A:H`;
+  const url = `${SHEETS_BASE}/${spreadsheetId}/values/${LOG_RANGE}`;
   const response = await fetch(url, {
     headers: authHeaders(accessToken),
   });
@@ -58,17 +100,22 @@ export async function readAllEntries(
     return [];
   }
 
-  // Skip header row (index 0)
-  return rows.slice(1).map((row) => ({
-    date: row[0] ?? "",
-    time: row[1] ?? "",
-    description: row[2] ?? "",
-    calories: Number(row[3]) || 0,
-    protein_g: Number(row[4]) || 0,
-    carbs_g: Number(row[5]) || 0,
-    fat_g: Number(row[6]) || 0,
-    raw_input: row[7] ?? "",
-  }));
+  // Build column index from actual header row
+  const headerRow = rows[0];
+  const colIndex = new Map<keyof FoodEntry, number>();
+  headerRow.forEach((header, i) => {
+    const key = HEADER_TO_KEY[header];
+    if (key) colIndex.set(key, i);
+  });
+
+  return rows.slice(1).map((row) => {
+    const entry = { ...DEFAULTS } as Record<keyof FoodEntry, string | number>;
+    for (const [key, idx] of colIndex) {
+      const raw = row[idx] ?? "";
+      entry[key] = NUMERIC_KEYS.has(key) ? (Number(raw) || 0) : raw;
+    }
+    return entry as unknown as FoodEntry;
+  });
 }
 
 export async function writeEntries(
@@ -76,79 +123,110 @@ export async function writeEntries(
   accessToken: string,
   entries: FoodEntry[],
 ): Promise<void> {
-  const url = `${SHEETS_BASE}/${spreadsheetId}/values/Log!A:H:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
+  const url = `${SHEETS_BASE}/${spreadsheetId}/values/${LOG_RANGE}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`;
 
   const response = await fetch(url, {
     method: "POST",
     headers: authHeaders(accessToken),
     body: JSON.stringify({
-      values: entries.map((e) => [
-        e.date,
-        e.time,
-        e.description,
-        e.calories,
-        e.protein_g,
-        e.carbs_g,
-        e.fat_g,
-        e.raw_input,
-      ]),
+      values: entries.map((e) =>
+        HEADERS.map((header) => {
+          const key = HEADER_TO_KEY[header];
+          return key ? e[key] : "";
+        })
+      ),
     }),
   });
 
   await ensureOk(response);
 }
 
-export async function checkLogSheetExists(
-  spreadsheetId: string,
-  accessToken: string,
-): Promise<boolean> {
-  const url = `${SHEETS_BASE}/${spreadsheetId}?fields=sheets.properties.title`;
-
-  const response = await fetch(url, {
-    headers: authHeaders(accessToken),
-  });
-
-  await ensureOk(response);
-
-  const data = await response.json();
-  const sheets: { properties: { title: string } }[] = data.sheets ?? [];
-
-  return sheets.some((sheet) => sheet.properties.title === "Log");
-}
-
-export async function createLogSheet(
+export async function ensureLogSheet(
   spreadsheetId: string,
   accessToken: string,
 ): Promise<void> {
-  // Step 1: Add the "Log" sheet via batchUpdate
-  const batchUrl = `${SHEETS_BASE}/${spreadsheetId}:batchUpdate`;
-
-  const batchResponse = await fetch(batchUrl, {
-    method: "POST",
+  // Step 1: Check if "Log" sheet exists
+  const metaUrl = `${SHEETS_BASE}/${spreadsheetId}?fields=sheets.properties.title`;
+  const metaResponse = await fetch(metaUrl, {
     headers: authHeaders(accessToken),
-    body: JSON.stringify({
-      requests: [
-        {
-          addSheet: {
-            properties: { title: "Log" },
-          },
-        },
-      ],
-    }),
   });
+  await ensureOk(metaResponse);
 
-  await ensureOk(batchResponse);
+  const metaData = await metaResponse.json();
+  const sheets: { properties: { title: string } }[] = metaData.sheets ?? [];
+  const sheetExists = sheets.some((s) => s.properties.title === "Log");
 
-  // Step 2: Write header row
-  const headersUrl = `${SHEETS_BASE}/${spreadsheetId}/values/Log!A1:H1?valueInputOption=RAW`;
+  if (!sheetExists) {
+    // Create sheet + write full headers
+    const batchUrl = `${SHEETS_BASE}/${spreadsheetId}:batchUpdate`;
+    const batchResponse = await fetch(batchUrl, {
+      method: "POST",
+      headers: authHeaders(accessToken),
+      body: JSON.stringify({
+        requests: [{ addSheet: { properties: { title: "Log" } } }],
+      }),
+    });
+    await ensureOk(batchResponse);
 
-  const headersResponse = await fetch(headersUrl, {
+    const headersUrl = `${SHEETS_BASE}/${spreadsheetId}/values/${LOG_HEADER_RANGE}?valueInputOption=RAW`;
+    const headersResponse = await fetch(headersUrl, {
+      method: "PUT",
+      headers: authHeaders(accessToken),
+      body: JSON.stringify({ values: [HEADERS] }),
+    });
+    await ensureOk(headersResponse);
+    return;
+  }
+
+  // Step 2: Sheet exists — read header row to check schema
+  const headerUrl = `${SHEETS_BASE}/${spreadsheetId}/values/Log!1:1`;
+  const headerResponse = await fetch(headerUrl, {
+    headers: authHeaders(accessToken),
+  });
+  await ensureOk(headerResponse);
+
+  const headerData = await headerResponse.json();
+  const existingHeaders: string[] = headerData.values?.[0] ?? [];
+
+  // Empty header row — write full headers
+  if (existingHeaders.length === 0) {
+    const writeUrl = `${SHEETS_BASE}/${spreadsheetId}/values/${LOG_HEADER_RANGE}?valueInputOption=RAW`;
+    const writeResponse = await fetch(writeUrl, {
+      method: "PUT",
+      headers: authHeaders(accessToken),
+      body: JSON.stringify({ values: [HEADERS] }),
+    });
+    await ensureOk(writeResponse);
+    return;
+  }
+
+  // Verify existing headers match expected prefix
+  const prefixLen = Math.min(existingHeaders.length, HEADERS.length);
+  for (let i = 0; i < prefixLen; i++) {
+    if (existingHeaders[i] !== HEADERS[i]) {
+      throw new SheetsApiError(
+        0,
+        `Schema mismatch: expected column ${i + 1} to be "${HEADERS[i]}" but found "${existingHeaders[i]}"`,
+      );
+    }
+  }
+
+  // Headers match current schema — no migration needed
+  if (existingHeaders.length >= HEADERS.length) {
+    return;
+  }
+
+  // Fewer headers than expected — append missing columns
+  const missingHeaders = HEADERS.slice(existingHeaders.length);
+  const startCol = columnLetter(existingHeaders.length + 1);
+  const endCol = LAST_COL;
+  const migrateRange = `Log!${startCol}1:${endCol}1`;
+
+  const migrateUrl = `${SHEETS_BASE}/${spreadsheetId}/values/${migrateRange}?valueInputOption=RAW`;
+  const migrateResponse = await fetch(migrateUrl, {
     method: "PUT",
     headers: authHeaders(accessToken),
-    body: JSON.stringify({
-      values: [HEADERS],
-    }),
+    body: JSON.stringify({ values: [missingHeaders] }),
   });
-
-  await ensureOk(headersResponse);
+  await ensureOk(migrateResponse);
 }

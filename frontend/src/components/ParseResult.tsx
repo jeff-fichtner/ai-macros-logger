@@ -1,9 +1,4 @@
-import type { AIParseResult } from '@/types';
-
-interface WriteError {
-  message: string;
-  isAuthError: boolean;
-}
+import type { AIParseResult, WriteError } from '@/types';
 
 interface ParseResultProps {
   result: AIParseResult;
@@ -21,7 +16,12 @@ export default function ParseResult({ result, onConfirm, onCancel, onRetry, onDi
 
   return (
     <div className={`rounded-lg border p-4 ${hasWriteError ? 'border-red-200 bg-red-50' : 'border-gray-200 bg-white'}`}>
-      <h3 className="mb-3 text-sm font-semibold text-gray-700">Parsed Items</h3>
+      <div className="mb-3 flex items-baseline justify-between">
+        <h3 className="text-sm font-semibold text-gray-700">{result.meal_label || 'Parsed Items'}</h3>
+        {result.meal_label && (
+          <span className="text-xs text-gray-400">AI-generated label</span>
+        )}
+      </div>
       <div className="space-y-2">
         {result.items.map((item, i) => (
           <div key={i} className="rounded-md border border-gray-100 bg-white p-3">

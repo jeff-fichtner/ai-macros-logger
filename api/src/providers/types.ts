@@ -7,15 +7,25 @@ export interface FoodItem {
   warning?: string;
 }
 
+export interface ParseResult {
+  meal_label: string;
+  items: FoodItem[];
+}
+
 export type ProviderHandler = (
   apiKey: string,
   systemPrompt: string,
   input: string,
-) => Promise<FoodItem[]>;
+) => Promise<ParseResult>;
 
 export const TOOL_SCHEMA = {
   type: "object" as const,
   properties: {
+    meal_label: {
+      type: "string" as const,
+      description:
+        "A short 1-4 word label describing this meal (e.g., 'Breakfast', 'Afternoon Snack')" as const,
+    },
     items: {
       type: "array" as const,
       items: {
@@ -38,5 +48,5 @@ export const TOOL_SCHEMA = {
       },
     },
   },
-  required: ["items"],
+  required: ["meal_label", "items"],
 };

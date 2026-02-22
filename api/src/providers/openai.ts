@@ -1,4 +1,4 @@
-import { TOOL_SCHEMA, type FoodItem, type ProviderHandler } from "./types.js";
+import { TOOL_SCHEMA, type FoodItem, type ParseResult, type ProviderHandler } from "./types.js";
 
 const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
 
@@ -86,10 +86,10 @@ export const callProvider: ProviderHandler = async (
     );
   }
 
-  let parsed: { items: FoodItem[] };
+  let parsed: { meal_label?: string; items: FoodItem[] };
 
   try {
-    parsed = JSON.parse(args) as { items: FoodItem[] };
+    parsed = JSON.parse(args) as { meal_label?: string; items: FoodItem[] };
   } catch (err) {
     throw new Error(
       `Failed to parse OpenAI tool arguments: ${err instanceof Error ? err.message : String(err)}`,
@@ -102,5 +102,8 @@ export const callProvider: ProviderHandler = async (
     );
   }
 
-  return parsed.items;
+  return {
+    meal_label: parsed.meal_label || "Meal",
+    items: parsed.items,
+  };
 };

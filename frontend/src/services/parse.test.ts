@@ -18,6 +18,7 @@ describe("parseFood", () => {
 
   it("delegates to apiPost with correct path and payload", async () => {
     const sample: AIParseResult = {
+      meal_label: "Lunch",
       items: [
         {
           description: "chicken breast",

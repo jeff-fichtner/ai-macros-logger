@@ -1,4 +1,4 @@
-import { TOOL_SCHEMA, type FoodItem, type ProviderHandler } from "./types.js";
+import { TOOL_SCHEMA, type FoodItem, type ParseResult, type ProviderHandler } from "./types.js";
 
 const GEMINI_API_URL =
   "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
@@ -8,7 +8,7 @@ interface GeminiResponse {
     content?: {
       parts?: {
         functionCall?: {
-          args?: { items: FoodItem[] };
+          args?: { meal_label?: string; items: FoodItem[] };
         };
       }[];
     };
@@ -95,5 +95,8 @@ export const callProvider: ProviderHandler = async (
     );
   }
 
-  return args.items;
+  return {
+    meal_label: args.meal_label || "Meal",
+    items: args.items,
+  };
 };

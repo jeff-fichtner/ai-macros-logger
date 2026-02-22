@@ -1,12 +1,12 @@
 import { useState, useCallback } from 'react';
-import type { AIParseResult, FoodEntry, DailySummary } from '@/types';
+import type { AIParseResult, FoodEntry, DailySummary, WriteError } from '@/types';
 import { parseFood } from '@/services/parse';
-import { readAllEntries, writeEntries, checkLogSheetExists, createLogSheet, SheetsApiError } from '@/services/sheets';
+import { readAllEntries, writeEntries, ensureLogSheet, SheetsApiError } from '@/services/sheets';
 import { refreshToken } from '@/services/oauth';
 import { useSettings } from '@/hooks/useSettings';
+import { parseEntryTimestamp, formatLocalDate } from '@/utils/entryTime';
 
 type Status = 'idle' | 'parsing' | 'writing' | 'loading';
-type WriteError = { message: string; isAuthError: boolean } | null;
 
 export function useFoodLog() {
   const settings = useSettings();
@@ -17,7 +17,7 @@ export function useFoodLog() {
   const [entries, setEntries] = useState<FoodEntry[]>([]);
   const [summary, setSummary] = useState<DailySummary | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [writeError, setWriteError] = useState<WriteError>(null);
+  const [writeError, setWriteError] = useState<WriteError | null>(null);
 
   const todayStr = () => {
     const now = new Date();
@@ -26,19 +26,30 @@ export function useFoodLog() {
 
   const nowTimeStr = () => {
     const now = new Date();
-    return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const hours = now.getHours();
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const h12 = hours % 12 || 12;
+    return `${h12}:${minutes} ${period}`;
+  };
+
+  const utcOffsetStr = () => {
+    const offset = new Date().getTimezoneOffset();
+    const sign = offset <= 0 ? '+' : '-';
+    const abs = Math.abs(offset);
+    const h = String(Math.floor(abs / 60)).padStart(2, '0');
+    const m = String(abs % 60).padStart(2, '0');
+    return `${sign}${h}:${m}`;
   };
 
   const computeSummary = useCallback((todayEntries: FoodEntry[]) => {
-    const date = todayStr();
-    const filtered = todayEntries.filter((e) => e.date === date);
     setSummary({
-      date,
-      totalCalories: filtered.reduce((sum, e) => sum + e.calories, 0),
-      totalProtein: filtered.reduce((sum, e) => sum + e.protein_g, 0),
-      totalCarbs: filtered.reduce((sum, e) => sum + e.carbs_g, 0),
-      totalFat: filtered.reduce((sum, e) => sum + e.fat_g, 0),
-      entryCount: filtered.length,
+      date: todayStr(),
+      totalCalories: todayEntries.reduce((sum, e) => sum + e.calories, 0),
+      totalProtein: todayEntries.reduce((sum, e) => sum + e.protein_g, 0),
+      totalCarbs: todayEntries.reduce((sum, e) => sum + e.carbs_g, 0),
+      totalFat: todayEntries.reduce((sum, e) => sum + e.fat_g, 0),
+      entryCount: todayEntries.length,
     });
   }, []);
 
@@ -47,17 +58,23 @@ export function useFoodLog() {
     setStatus('loading');
     setError(null);
     try {
-      const sheetExists = await checkLogSheetExists(settings.spreadsheetId, settings.googleAccessToken);
-      if (!sheetExists) {
-        await createLogSheet(settings.spreadsheetId, settings.googleAccessToken);
-      }
+      await ensureLogSheet(settings.spreadsheetId, settings.googleAccessToken);
       const allEntries = await readAllEntries(settings.spreadsheetId, settings.googleAccessToken);
       const today = todayStr();
-      const todayEntries = allEntries.filter((e) => e.date === today);
+      const todayEntries = allEntries
+        .filter((e) => {
+          const ts = parseEntryTimestamp(e);
+          return ts ? formatLocalDate(ts) === today : e.date === today;
+        })
+        .sort((a, b) => {
+          const ta = parseEntryTimestamp(a)?.getTime() ?? 0;
+          const tb = parseEntryTimestamp(b)?.getTime() ?? 0;
+          return ta - tb;
+        });
       setEntries(todayEntries);
       computeSummary(todayEntries);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load entries');
+      setError(err instanceof Error ? err.message : 'Failed to load entries from Google Sheets');
     } finally {
       setStatus('idle');
     }
@@ -77,7 +94,7 @@ export function useFoodLog() {
       const result = await parseFood(activeConfig.provider, activeConfig.apiKey, input);
       setParseResult(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to parse food');
+      setError(err instanceof Error ? err.message : 'Failed to parse food description');
     } finally {
       setStatus('idle');
     }
@@ -86,13 +103,13 @@ export function useFoodLog() {
   const attemptWrite = useCallback(async (accessToken: string) => {
     if (!parseResult) return;
 
-    const sheetExists = await checkLogSheetExists(settings.spreadsheetId, accessToken);
-    if (!sheetExists) {
-      await createLogSheet(settings.spreadsheetId, accessToken);
-    }
+    await ensureLogSheet(settings.spreadsheetId, accessToken);
 
     const date = todayStr();
     const time = nowTimeStr();
+    const offset = utcOffsetStr();
+    const groupId = crypto.randomUUID();
+    const mealLabel = parseResult.meal_label || "Meal";
     const foodEntries: FoodEntry[] = parseResult.items.map((item) => ({
       date,
       time,
@@ -102,6 +119,9 @@ export function useFoodLog() {
       carbs_g: item.carbs_g,
       fat_g: item.fat_g,
       raw_input: rawInput,
+      group_id: groupId,
+      meal_label: mealLabel,
+      utc_offset: offset,
     }));
 
     await writeEntries(settings.spreadsheetId, accessToken, foodEntries);
@@ -118,7 +138,7 @@ export function useFoodLog() {
       setWriteError(null);
       await loadTodaysEntries();
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to write to sheet';
+      const message = err instanceof Error ? err.message : 'Failed to save entries to Google Sheets';
       const status = err instanceof SheetsApiError ? err.status : 0;
 
       if (status === 401 && settings.googleRefreshToken) {

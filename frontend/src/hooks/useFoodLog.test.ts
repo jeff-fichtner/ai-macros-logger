@@ -3,7 +3,7 @@ import { renderHook, act } from '@testing-library/react';
 import { useSettings } from '@/hooks/useSettings';
 import { useFoodLog } from '@/hooks/useFoodLog';
 import { parseFood } from '@/services/parse';
-import { readAllEntries, writeEntries, checkLogSheetExists, createLogSheet, SheetsApiError } from '@/services/sheets';
+import { readAllEntries, writeEntries, ensureLogSheet, SheetsApiError } from '@/services/sheets';
 import { refreshToken } from '@/services/oauth';
 
 vi.mock('@/services/parse', () => ({
@@ -16,8 +16,7 @@ vi.mock('@/services/sheets', async (importOriginal) => {
     ...actual,
     readAllEntries: vi.fn(),
     writeEntries: vi.fn(),
-    checkLogSheetExists: vi.fn(),
-    createLogSheet: vi.fn(),
+    ensureLogSheet: vi.fn(),
   };
 });
 
@@ -28,8 +27,7 @@ vi.mock('@/services/oauth', () => ({
 const mockParseFood = vi.mocked(parseFood);
 const mockReadAllEntries = vi.mocked(readAllEntries);
 const mockWriteEntries = vi.mocked(writeEntries);
-const mockCheckLogSheetExists = vi.mocked(checkLogSheetExists);
-const mockCreateLogSheet = vi.mocked(createLogSheet);
+const mockEnsureLogSheet = vi.mocked(ensureLogSheet);
 const mockRefreshToken = vi.mocked(refreshToken);
 
 describe('useFoodLog', () => {
@@ -47,6 +45,7 @@ describe('useFoodLog', () => {
       spreadsheetId: 'sheet-123',
       macroTargets: null,
     });
+    mockEnsureLogSheet.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -57,6 +56,7 @@ describe('useFoodLog', () => {
 
   it('parse success', async () => {
     mockParseFood.mockResolvedValueOnce({
+      meal_label: 'Lunch',
       items: [{ description: 'Chicken', calories: 300, protein_g: 30, carbs_g: 0, fat_g: 10 }],
     });
 
@@ -67,6 +67,7 @@ describe('useFoodLog', () => {
     });
 
     expect(result.current.parseResult).toEqual({
+      meal_label: 'Lunch',
       items: [{ description: 'Chicken', calories: 300, protein_g: 30, carbs_g: 0, fat_g: 10 }],
     });
     expect(result.current.status).toBe('idle');
@@ -87,9 +88,9 @@ describe('useFoodLog', () => {
 
   it('confirm success', async () => {
     mockParseFood.mockResolvedValueOnce({
+      meal_label: 'Lunch',
       items: [{ description: 'Chicken', calories: 300, protein_g: 30, carbs_g: 0, fat_g: 10 }],
     });
-    mockCheckLogSheetExists.mockResolvedValue(true);
     mockWriteEntries.mockResolvedValue(undefined);
     mockReadAllEntries.mockResolvedValue([]);
 
@@ -103,38 +104,16 @@ describe('useFoodLog', () => {
       await result.current.confirm();
     });
 
+    expect(mockEnsureLogSheet).toHaveBeenCalled();
     expect(result.current.parseResult).toBeNull();
     expect(result.current.writeError).toBeNull();
   });
 
-  it('confirm creates sheet first when it does not exist', async () => {
-    mockParseFood.mockResolvedValueOnce({
-      items: [{ description: 'Chicken', calories: 300, protein_g: 30, carbs_g: 0, fat_g: 10 }],
-    });
-    mockCheckLogSheetExists.mockResolvedValue(false);
-    mockCreateLogSheet.mockResolvedValue(undefined);
-    mockWriteEntries.mockResolvedValue(undefined);
-    mockReadAllEntries.mockResolvedValue([]);
-
-    const { result } = renderHook(() => useFoodLog());
-
-    await act(async () => {
-      await result.current.parse('chicken');
-    });
-
-    await act(async () => {
-      await result.current.confirm();
-    });
-
-    expect(mockCreateLogSheet).toHaveBeenCalled();
-    expect(mockWriteEntries).toHaveBeenCalled();
-  });
-
   it('confirm 401 with refresh token triggers token refresh then retry write', async () => {
     mockParseFood.mockResolvedValueOnce({
+      meal_label: 'Lunch',
       items: [{ description: 'Chicken', calories: 300, protein_g: 30, carbs_g: 0, fat_g: 10 }],
     });
-    mockCheckLogSheetExists.mockResolvedValue(true);
     mockWriteEntries
       .mockRejectedValueOnce(new SheetsApiError(401, 'Unauthorized'))
       .mockResolvedValueOnce(undefined);
@@ -158,9 +137,9 @@ describe('useFoodLog', () => {
 
   it('confirm 401 with failed refresh sets writeError.isAuthError=true and preserves parseResult', async () => {
     mockParseFood.mockResolvedValueOnce({
+      meal_label: 'Lunch',
       items: [{ description: 'Chicken', calories: 300, protein_g: 30, carbs_g: 0, fat_g: 10 }],
     });
-    mockCheckLogSheetExists.mockResolvedValue(true);
     mockWriteEntries.mockRejectedValue(new SheetsApiError(401, 'Unauthorized'));
     mockRefreshToken.mockRejectedValueOnce(new Error('Refresh failed'));
 
@@ -181,9 +160,9 @@ describe('useFoodLog', () => {
 
   it('confirm 429 sets writeError with rate limit message and preserves parseResult', async () => {
     mockParseFood.mockResolvedValueOnce({
+      meal_label: 'Lunch',
       items: [{ description: 'Chicken', calories: 300, protein_g: 30, carbs_g: 0, fat_g: 10 }],
     });
-    mockCheckLogSheetExists.mockResolvedValue(true);
     mockWriteEntries.mockRejectedValue(new SheetsApiError(429, 'Too Many Requests'));
 
     const { result } = renderHook(() => useFoodLog());
@@ -202,9 +181,9 @@ describe('useFoodLog', () => {
 
   it('retry after write error succeeds and clears writeError', async () => {
     mockParseFood.mockResolvedValueOnce({
+      meal_label: 'Lunch',
       items: [{ description: 'Chicken', calories: 300, protein_g: 30, carbs_g: 0, fat_g: 10 }],
     });
-    mockCheckLogSheetExists.mockResolvedValue(true);
     mockWriteEntries
       .mockRejectedValueOnce(new SheetsApiError(429, 'Too Many Requests'))
       .mockResolvedValueOnce(undefined);
@@ -231,9 +210,9 @@ describe('useFoodLog', () => {
 
   it('dismiss clears parseResult and writeError', async () => {
     mockParseFood.mockResolvedValueOnce({
+      meal_label: 'Lunch',
       items: [{ description: 'Chicken', calories: 300, protein_g: 30, carbs_g: 0, fat_g: 10 }],
     });
-    mockCheckLogSheetExists.mockResolvedValue(true);
     mockWriteEntries.mockRejectedValue(new SheetsApiError(429, 'Too Many Requests'));
 
     const { result } = renderHook(() => useFoodLog());
@@ -259,8 +238,8 @@ describe('useFoodLog', () => {
 
   it('loadTodaysEntries filters by today date and computes summary', async () => {
     mockReadAllEntries.mockResolvedValueOnce([
-      { date: '2026-02-21', time: '12:00', description: 'Chicken', calories: 300, protein_g: 30, carbs_g: 0, fat_g: 10, raw_input: 'chicken' },
-      { date: '2026-02-20', time: '10:00', description: 'Rice', calories: 200, protein_g: 5, carbs_g: 40, fat_g: 2, raw_input: 'rice' },
+      { date: '2026-02-21', time: '12:00 PM', description: 'Chicken', calories: 300, protein_g: 30, carbs_g: 0, fat_g: 10, raw_input: 'chicken', group_id: 'g1', meal_label: 'Lunch', utc_offset: '-08:00' },
+      { date: '2026-02-20', time: '10:00 AM', description: 'Rice', calories: 200, protein_g: 5, carbs_g: 40, fat_g: 2, raw_input: 'rice', group_id: 'g2', meal_label: 'Dinner', utc_offset: '-08:00' },
     ]);
 
     const { result } = renderHook(() => useFoodLog());

@@ -7,6 +7,9 @@ export interface FoodEntry {
   carbs_g: number;
   fat_g: number;
   raw_input: string;
+  group_id: string;
+  meal_label: string;
+  utc_offset: string;
 }
 
 export interface DailySummary {
@@ -54,7 +57,13 @@ export interface AIParseItem {
 }
 
 export interface AIParseResult {
+  meal_label: string;
   items: AIParseItem[];
+}
+
+export interface WriteError {
+  message: string;
+  isAuthError: boolean;
 }
 
 export interface ApiError {

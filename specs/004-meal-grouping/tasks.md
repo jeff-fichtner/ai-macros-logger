@@ -19,8 +19,8 @@
 
 **Purpose**: Update shared type definitions and tool schema that both API and frontend depend on
 
-- [ ] T001 [US1] Add `meal_label` to `TOOL_SCHEMA`, add `ParseResult` type, and update `ProviderHandler` return type in `api/src/providers/types.ts`
-- [ ] T002 [US1] Add `group_id` and `meal_label` fields to `FoodEntry` type; update `AIParseResult` from `{ items: AIParseItem[] }` to `{ meal_label: string; items: AIParseItem[] }` in `frontend/src/types/index.ts`
+- [x] T001 [US1] Add `meal_label` to `TOOL_SCHEMA`, add `ParseResult` type, and update `ProviderHandler` return type in `api/src/providers/types.ts`
+- [x] T002 [US1] Add `group_id` and `meal_label` fields to `FoodEntry` type; update `AIParseResult` from `{ items: AIParseItem[] }` to `{ meal_label: string; items: AIParseItem[] }` in `frontend/src/types/index.ts`
 
 **Checkpoint**: Shared types updated — API and frontend layers can now be implemented
 
@@ -30,11 +30,11 @@
 
 **Purpose**: Update all three provider handlers to extract `meal_label` and return `ParseResult`, then update the parse endpoint to include `meal_label` in its response
 
-- [ ] T003 [US1] Update system prompt in `api/src/functions/parse.ts` to instruct AI to return a `meal_label` field (1–4 word meal description)
-- [ ] T004 [P] [US1] Update Claude provider to extract `meal_label` from tool response, return `ParseResult` with fallback `"Meal"` in `api/src/providers/claude.ts`
-- [ ] T005 [P] [US1] Update OpenAI provider to extract `meal_label` from parsed tool arguments, return `ParseResult` with fallback `"Meal"` in `api/src/providers/openai.ts`
-- [ ] T006 [P] [US1] Update Gemini provider to extract `meal_label` from function call args, return `ParseResult` with fallback `"Meal"` in `api/src/providers/gemini.ts`
-- [ ] T007 [US1] Update parse endpoint to include `meal_label` in response body (`{ meal_label, items }`) in `api/src/functions/parse.ts`
+- [x] T003 [US1] Update system prompt in `api/src/functions/parse.ts` to instruct AI to return a `meal_label` field (1–4 word meal description)
+- [x] T004 [P] [US1] Update Claude provider to extract `meal_label` from tool response, return `ParseResult` with fallback `"Meal"` in `api/src/providers/claude.ts`
+- [x] T005 [P] [US1] Update OpenAI provider to extract `meal_label` from parsed tool arguments, return `ParseResult` with fallback `"Meal"` in `api/src/providers/openai.ts`
+- [x] T006 [P] [US1] Update Gemini provider to extract `meal_label` from function call args, return `ParseResult` with fallback `"Meal"` in `api/src/providers/gemini.ts`
+- [x] T007 [US1] Update parse endpoint to include `meal_label` in response body (`{ meal_label, items }`) in `api/src/functions/parse.ts`
 
 **Checkpoint**: API returns `meal_label` alongside items for all three providers
 
@@ -44,10 +44,10 @@
 
 **Purpose**: Extend Google Sheets read/write to handle new columns, update the food log hook to generate group IDs and pass meal labels, and update EntryHistory to render grouped display
 
-- [ ] T008 [US1] Extend Google Sheets schema in `frontend/src/services/sheets.ts`: append `"Group ID"` and `"Meal Label"` to `HEADERS`; update `readAllEntries` range from `A:H` to `A:J` and map `row[8]`→`group_id`, `row[9]`→`meal_label`; update `writeEntries` range from `A:H` to `A:J` and append both fields to each row; update `createLogSheet` header range from `A1:H1` to `A1:J1`
-- [ ] T009 [US1] Update `useFoodLog` hook: store `meal_label` from parse response, generate `group_id` via `Date.now().toString(36)` at confirm time, pass both fields when creating `FoodEntry` objects in `frontend/src/hooks/useFoodLog.ts`
-- [ ] T010 [US1] Update `ParseResult` component to display the AI-generated `meal_label` above the items list before the user clicks Confirm in `frontend/src/components/ParseResult.tsx`
-- [ ] T011 [US1] Update `EntryHistory` component: group entries by `group_id` using a `Map` to preserve insertion order (chronological), render group header (meal label + time), individual items per group, and a subtotal row (summed calories, protein, carbs, fat) per group in `frontend/src/components/EntryHistory.tsx`
+- [x] T008 [US1] Extend Google Sheets schema in `frontend/src/services/sheets.ts`: append `"Group ID"` and `"Meal Label"` to `HEADERS`; update `readAllEntries` range from `A:H` to `A:J` and map `row[8]`→`group_id`, `row[9]`→`meal_label`; update `writeEntries` range from `A:H` to `A:J` and append both fields to each row; update `createLogSheet` header range from `A1:H1` to `A1:J1`
+- [x] T009 [US1] Update `useFoodLog` hook: store `meal_label` from parse response, generate `group_id` via `Date.now().toString(36)` at confirm time, pass both fields when creating `FoodEntry` objects in `frontend/src/hooks/useFoodLog.ts`
+- [x] T010 [US1] Update `ParseResult` component to display the AI-generated `meal_label` above the items list before the user clicks Confirm in `frontend/src/components/ParseResult.tsx`
+- [x] T011 [US1] Update `EntryHistory` component: group entries by `group_id` using a `Map` to preserve insertion order (chronological), render group header (meal label + time), individual items per group, and a subtotal row (summed calories, protein, carbs, fat) per group in `frontend/src/components/EntryHistory.tsx`
 
 **Checkpoint**: Full feature functional — meals are grouped with labels, timestamps, and subtotals in the food log
 
@@ -57,8 +57,8 @@
 
 **Purpose**: Ensure existing tests pass, verify no regressions
 
-- [ ] T012 Run existing test suite (`npm test`) and fix any failures caused by type changes
-- [ ] T013 Run linter (`npm run lint`) and fix any issues
+- [x] T012 Run existing test suite (`npm test`) and fix any failures caused by type changes
+- [x] T013 Run linter (`npm run lint`) and fix any issues
 
 ---
 

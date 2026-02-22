@@ -25,7 +25,8 @@ Guidelines:
 - When quantity is ambiguous or omitted (e.g., "almonds", "some pasta"), estimate a typical single serving and include a warning field explaining the assumption.
 - For composite or prepared foods (e.g., "Caesar salad"), estimate based on a typical restaurant or homemade serving.
 - Round calories to the nearest whole number. Round grams to one decimal place.
-- If the input does not describe food at all, return a single item with description "Not a food item", all macros set to 0, and a warning explaining why the input could not be parsed as food.`;
+- If the input does not describe food at all, return a single item with description "Not a food item", all macros set to 0, and a warning explaining why the input could not be parsed as food.
+- Return a meal_label field: a short 1–4 word label describing the meal (e.g., "Breakfast", "Afternoon Snack", "Post-Workout Meal"). Base the label on the food items and context.`;
 
 const providers: Record<string, ProviderHandler> = {
   claude: callClaude,
@@ -70,8 +71,8 @@ export async function parseHandler(
   const handler = providers[body.provider];
 
   try {
-    const items = await handler(body.apiKey, SYSTEM_PROMPT, body.input);
-    return jsonResponse(200, { items });
+    const result = await handler(body.apiKey, SYSTEM_PROMPT, body.input);
+    return jsonResponse(200, { meal_label: result.meal_label, items: result.items });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     const status =
