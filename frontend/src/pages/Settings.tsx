@@ -34,15 +34,15 @@ export default function Settings() {
       <OnboardingGuide />
 
       <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-gray-900">AI Providers</h2>
+        <h2 className="text-lg font-semibold text-gray-900">1. AI Providers</h2>
         <ProviderList />
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-gray-900">Google Credentials</h2>
+        <h2 className="text-lg font-semibold text-gray-900">2. Google Cloud OAuth</h2>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Google OAuth Client ID</label>
+          <label className="block text-sm font-medium text-gray-700">Client ID</label>
           <input
             type="text"
             value={clientId}
@@ -53,7 +53,7 @@ export default function Settings() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Google OAuth Client Secret</label>
+          <label className="block text-sm font-medium text-gray-700">Client Secret</label>
           <input
             type="password"
             value={clientSecret}
@@ -62,6 +62,10 @@ export default function Settings() {
             className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold text-gray-900">3. Google Sheet</h2>
 
         <div>
           <label className="block text-sm font-medium text-gray-700">Spreadsheet ID or URL</label>
@@ -79,7 +83,7 @@ export default function Settings() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-gray-900">Google Account</h2>
+        <h2 className="text-lg font-semibold text-gray-900">4. Connect Google Account</h2>
         <div className="flex items-center gap-3">
           {isConnected ? (
             <>
