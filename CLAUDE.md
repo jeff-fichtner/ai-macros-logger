@@ -7,6 +7,7 @@ Auto-generated from all feature plans. Last updated: 2026-02-20
 - N/A (test-only feature) (002-test-suite)
 - TypeScript 5.9, Node.js 20 LTS + React 19, Vite 7, Zustand 5, Azure Functions v4, Tailwind CSS v4 (003-multi-provider-ai)
 - Browser localStorage (Zustand persist), Google Sheets (data) (003-multi-provider-ai)
+- Google Sheets (flat rows with 2 new columns: Group ID, Meal Label) (004-meal-grouping)
 
 - TypeScript 5.x, Node.js 20 LTS + React 19, Vite, React Router v7, Zustand, Tailwind CSS v4, Azure Functions v4 (Node.js model) (001-macro-nutrition-logger)
 
@@ -34,10 +35,10 @@ npm test && npm run lint
 TypeScript 5.x, Node.js 20 LTS: Follow standard conventions
 
 ## Recent Changes
+- 004-meal-grouping: Added TypeScript 5.9, Node.js 20 LTS + React 19, Vite 7, Zustand 5, Azure Functions v4, Tailwind CSS v4
 - 003-multi-provider-ai: Added TypeScript 5.9, Node.js 20 LTS + React 19, Vite 7, Zustand 5, Azure Functions v4, Tailwind CSS v4
 - 002-test-suite: Added TypeScript 5.9, Node.js 20 LTS + Vitest 3.x, @testing-library/react, happy-dom
 
-- 001-macro-nutrition-logger: Added TypeScript 5.x, Node.js 20 LTS + React 19, Vite, React Router v7, Zustand, Tailwind CSS v4, Azure Functions v4 (Node.js model)
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->
