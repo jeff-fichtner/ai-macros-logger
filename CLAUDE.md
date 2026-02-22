@@ -37,9 +37,9 @@ npm test && npm run lint
 TypeScript 5.x, Node.js 20 LTS: Follow standard conventions
 
 ## Recent Changes
+- 006-refine-parse-results: Added TypeScript 5.x, Node.js 20 LTS + React 19, Vite, Zustand 5, Tailwind CSS v4
 - 005-delete-entries: Added TypeScript 5.x, Node.js 20 LTS + React 19, Vite, Zustand 5, Tailwind CSS v4
 - 004-meal-grouping: Added TypeScript 5.9, Node.js 20 LTS + React 19, Vite 7, Zustand 5, Azure Functions v4, Tailwind CSS v4
-- 003-multi-provider-ai: Added TypeScript 5.9, Node.js 20 LTS + React 19, Vite 7, Zustand 5, Azure Functions v4, Tailwind CSS v4
 
 
 <!-- MANUAL ADDITIONS START -->
