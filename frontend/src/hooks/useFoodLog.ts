@@ -47,6 +47,10 @@ export function useFoodLog() {
     setStatus('loading');
     setError(null);
     try {
+      const sheetExists = await checkLogSheetExists(settings.spreadsheetId, settings.googleAccessToken);
+      if (!sheetExists) {
+        await createLogSheet(settings.spreadsheetId, settings.googleAccessToken);
+      }
       const allEntries = await readAllEntries(settings.spreadsheetId, settings.googleAccessToken);
       const today = todayStr();
       const todayEntries = allEntries.filter((e) => e.date === today);

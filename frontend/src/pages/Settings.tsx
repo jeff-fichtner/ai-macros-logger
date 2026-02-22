@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSettings } from '@/hooks/useSettings';
 import { useGoogleAuth } from '@/hooks/useGoogleAuth';
 import OnboardingGuide from '@/components/OnboardingGuide';
@@ -12,21 +13,19 @@ function extractSpreadsheetId(input: string): string {
 export default function Settings() {
   const settings = useSettings();
   const { connect, disconnect, isConnected } = useGoogleAuth();
+  const navigate = useNavigate();
 
   const [claudeKey, setClaudeKey] = useState(settings.claudeApiKey);
   const [clientId, setClientId] = useState(settings.googleClientId);
   const [clientSecret, setClientSecret] = useState(settings.googleClientSecret);
   const [sheetInput, setSheetInput] = useState(settings.spreadsheetId);
   const [targets, setTargets] = useState<MacroTargets | null>(settings.macroTargets);
-  const [saved, setSaved] = useState(false);
-
   const handleSave = () => {
     settings.setClaudeApiKey(claudeKey.trim());
     settings.setGoogleCredentials(clientId.trim(), clientSecret.trim());
     settings.setSpreadsheetId(extractSpreadsheetId(sheetInput));
     settings.setMacroTargets(targets);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    navigate('/');
   };
 
   const claudeKeyValid = claudeKey.trim() === '' || claudeKey.trim().startsWith('sk-ant-');
@@ -168,7 +167,6 @@ export default function Settings() {
         >
           Save Settings
         </button>
-        {saved && <span className="text-sm text-green-600">Saved</span>}
       </div>
     </div>
   );

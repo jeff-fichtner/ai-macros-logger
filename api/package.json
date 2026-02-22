@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "start": "func start",
-    "dev": "npm run build && func start",
+    "dev": "tsc --watch & func start",
     "test": "vitest --run"
   },
   "dependencies": {

@@ -45,10 +45,6 @@ export async function readAllEntries(
     headers: authHeaders(accessToken),
   });
 
-  if (response.status === 404) {
-    return [];
-  }
-
   await ensureOk(response);
 
   const data = await response.json();

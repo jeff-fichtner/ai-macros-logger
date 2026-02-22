@@ -122,32 +122,27 @@ export async function parseHandler(
         tool_choice: { type: "tool", name: "parse_food_items" },
       }),
     });
-  } catch {
-    return jsonResponse(502, { error: "AI service unavailable" });
-  }
-
-  if (claudeResponse.status === 401) {
-    return jsonResponse(401, { error: "Invalid API key" });
-  }
-
-  if (claudeResponse.status === 429) {
-    return jsonResponse(429, { error: "Rate limited", retryAfter: 30 });
-  }
-
-  if (claudeResponse.status >= 500) {
-    return jsonResponse(502, { error: "AI service unavailable" });
+  } catch (err) {
+    return jsonResponse(502, {
+      error: `Failed to reach Claude API: ${err instanceof Error ? err.message : String(err)}`,
+    });
   }
 
   if (!claudeResponse.ok) {
-    return jsonResponse(502, { error: "AI service unavailable" });
+    const text = await claudeResponse.text().catch(() => "");
+    return jsonResponse(claudeResponse.status === 401 ? 401 : claudeResponse.status === 429 ? 429 : 502, {
+      error: `Claude API ${claudeResponse.status}: ${text || claudeResponse.statusText}`,
+    });
   }
 
   let claudeBody: ClaudeResponse;
 
   try {
     claudeBody = (await claudeResponse.json()) as ClaudeResponse;
-  } catch {
-    return jsonResponse(502, { error: "AI service unavailable" });
+  } catch (err) {
+    return jsonResponse(502, {
+      error: `Failed to parse Claude response: ${err instanceof Error ? err.message : String(err)}`,
+    });
   }
 
   const toolUseBlock = claudeBody.content?.find(
@@ -155,7 +150,9 @@ export async function parseHandler(
   );
 
   if (!toolUseBlock?.input?.items || !Array.isArray(toolUseBlock.input.items)) {
-    return jsonResponse(502, { error: "AI service unavailable" });
+    return jsonResponse(502, {
+      error: `Unexpected Claude response structure: ${JSON.stringify(claudeBody.content?.map((b) => b.type))}`,
+    });
   }
 
   return jsonResponse(200, { items: toolUseBlock.input.items });
