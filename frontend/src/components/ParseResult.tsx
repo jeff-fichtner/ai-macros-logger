@@ -1,17 +1,22 @@
+import { useState } from 'react';
 import type { AIParseResult, WriteError } from '@/types';
 
 interface ParseResultProps {
   result: AIParseResult;
   onConfirm: () => void;
   onCancel: () => void;
+  onRefine: (instruction: string) => void;
   onRetry?: () => void;
   onDismiss?: () => void;
   writing: boolean;
+  refining: boolean;
   error?: string | null;
   writeError?: WriteError | null;
+  refineError?: string | null;
 }
 
-export default function ParseResult({ result, onConfirm, onCancel, onRetry, onDismiss, writing, error, writeError }: ParseResultProps) {
+export default function ParseResult({ result, onConfirm, onCancel, onRefine, onRetry, onDismiss, writing, refining, error, writeError, refineError }: ParseResultProps) {
+  const [refineInput, setRefineInput] = useState('');
   const hasWriteError = writeError != null;
 
   return (
@@ -40,6 +45,37 @@ export default function ParseResult({ result, onConfirm, onCancel, onRetry, onDi
           </div>
         ))}
       </div>
+
+      <form
+        className="mt-3 flex gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          const trimmed = refineInput.trim();
+          if (!trimmed) return;
+          onRefine(trimmed);
+          setRefineInput('');
+        }}
+      >
+        <input
+          type="text"
+          value={refineInput}
+          onChange={(e) => setRefineInput(e.target.value)}
+          placeholder="Refine results (e.g. &quot;make it 2 eggs&quot;)"
+          disabled={refining}
+          className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:bg-gray-100"
+        />
+        <button
+          type="submit"
+          disabled={refining || !refineInput.trim()}
+          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:bg-gray-300"
+        >
+          {refining ? 'Refining...' : 'Refine'}
+        </button>
+      </form>
+
+      {refineError && (
+        <p className="mt-2 text-sm text-red-600">{refineError}</p>
+      )}
 
       {writeError && (
         <div className="mt-3 rounded-md border border-red-200 bg-white p-3">
@@ -82,14 +118,14 @@ export default function ParseResult({ result, onConfirm, onCancel, onRetry, onDi
           <>
             <button
               onClick={onConfirm}
-              disabled={writing}
+              disabled={writing || refining}
               className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:bg-gray-300"
             >
               {writing ? 'Saving...' : 'Confirm'}
             </button>
             <button
               onClick={onCancel}
-              disabled={writing}
+              disabled={writing || refining}
               className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:bg-gray-100"
             >
               Cancel

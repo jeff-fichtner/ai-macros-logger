@@ -17,10 +17,10 @@
 
 **Purpose**: Service-layer helper and hook state changes that both user stories depend on
 
-- [ ] T001 Add `buildRefinementPrompt` pure function in `frontend/src/services/parse.ts` that accepts `originalInput: string`, `currentResult: AIParseResult`, and `refinements: string[]`, and returns a single prompt string in the format: `Original: "{originalInput}"\nCurrent results:\n{formatted items}\nRefinement: "{latest refinement}"`. Include all prior refinements in the prompt body for full context (per research R3).
-- [ ] T002 Add `'refining'` to the `Status` type union in `frontend/src/hooks/useFoodLog.ts` (becomes `'idle' | 'parsing' | 'writing' | 'loading' | 'deleting' | 'refining'`)
-- [ ] T003 Add `refinementHistory` state (`string[]`, initial `[]`) to `useFoodLog` hook in `frontend/src/hooks/useFoodLog.ts` and expose it in the return object
-- [ ] T004 Clear `refinementHistory` to `[]` inside the existing `confirm`, `cancel`, and `dismiss` callbacks in `frontend/src/hooks/useFoodLog.ts`
+- [X] T001 Add `buildRefinementPrompt` pure function in `frontend/src/services/parse.ts` that accepts `originalInput: string`, `currentResult: AIParseResult`, and `refinements: string[]`, and returns a single prompt string in the format: `Original: "{originalInput}"\nCurrent results:\n{formatted items}\nRefinement: "{latest refinement}"`. Include all prior refinements in the prompt body for full context (per research R3).
+- [X] T002 Add `'refining'` to the `Status` type union in `frontend/src/hooks/useFoodLog.ts` (becomes `'idle' | 'parsing' | 'writing' | 'loading' | 'deleting' | 'refining'`)
+- [X] T003 Add `refinementHistory` state (`string[]`, initial `[]`) to `useFoodLog` hook in `frontend/src/hooks/useFoodLog.ts` and expose it in the return object
+- [X] T004 Clear `refinementHistory` to `[]` inside the existing `confirm`, `cancel`, and `dismiss` callbacks in `frontend/src/hooks/useFoodLog.ts`
 
 **Checkpoint**: Service helper and hook state are ready — both user stories can now be implemented
 
@@ -34,10 +34,10 @@
 
 ### Implementation for User Story 1
 
-- [ ] T005 [US1] Add `refine` callback in `frontend/src/hooks/useFoodLog.ts` that accepts an `instruction: string`; guards against empty string (FR-010); sets status to `'refining'`; calls `buildRefinementPrompt(rawInput, parseResult, [...refinementHistory, instruction])` then `parseFood(provider, apiKey, combinedPrompt)`; on success: sets `parseResult` to new result and appends `instruction` to `refinementHistory`; on failure: sets `error` message but preserves existing `parseResult` (FR-007); always resets status to `'idle'`
-- [ ] T006 [US1] Update `ParseResultProps` in `frontend/src/components/ParseResult.tsx` to accept `onRefine: (instruction: string) => void` and `refining: boolean`
-- [ ] T007 [US1] Add refinement UI to `frontend/src/components/ParseResult.tsx` — between the items list and the action buttons, add a text input and a "Refine" submit button. The input clears after successful submission. Show "Refining..." on the button when `refining` is true. Disable Refine, Confirm, and Cancel buttons while `refining` is true (FR-006). Ignore empty submissions (FR-010).
-- [ ] T008 [US1] Wire `refine` callback and `refining` status from `useFoodLog` hook into `ParseResult` component in `frontend/src/pages/FoodLog.tsx` — pass `onRefine={refine}` and `refining={status === 'refining'}`
+- [X] T005 [US1] Add `refine` callback in `frontend/src/hooks/useFoodLog.ts` that accepts an `instruction: string`; guards against empty string (FR-010); sets status to `'refining'`; calls `buildRefinementPrompt(rawInput, parseResult, [...refinementHistory, instruction])` then `parseFood(provider, apiKey, combinedPrompt)`; on success: sets `parseResult` to new result and appends `instruction` to `refinementHistory`; on failure: sets `error` message but preserves existing `parseResult` (FR-007); always resets status to `'idle'`
+- [X] T006 [US1] Update `ParseResultProps` in `frontend/src/components/ParseResult.tsx` to accept `onRefine: (instruction: string) => void` and `refining: boolean`
+- [X] T007 [US1] Add refinement UI to `frontend/src/components/ParseResult.tsx` — between the items list and the action buttons, add a text input and a "Refine" submit button. The input clears after successful submission. Show "Refining..." on the button when `refining` is true. Disable Refine, Confirm, and Cancel buttons while `refining` is true (FR-006). Ignore empty submissions (FR-010).
+- [X] T008 [US1] Wire `refine` callback and `refining` status from `useFoodLog` hook into `ParseResult` component in `frontend/src/pages/FoodLog.tsx` — pass `onRefine={refine}` and `refining={status === 'refining'}`
 
 **Checkpoint**: Core refinement flow is fully functional and testable independently
 
@@ -51,9 +51,9 @@
 
 ### Implementation for User Story 2
 
-- [ ] T009 [US2] Add `refineError` state (`string | null`) to `useFoodLog` hook in `frontend/src/hooks/useFoodLog.ts`; set it on refinement failure in the `refine` callback; clear it on new refinement attempt, confirm, cancel, or dismiss; expose it in the return object
-- [ ] T010 [US2] Update `ParseResultProps` in `frontend/src/components/ParseResult.tsx` to accept `refineError: string | null`; display an inline error message below the refinement input when `refineError` is set
-- [ ] T011 [US2] Wire `refineError` from `useFoodLog` hook into `ParseResult` component in `frontend/src/pages/FoodLog.tsx`
+- [X] T009 [US2] Add `refineError` state (`string | null`) to `useFoodLog` hook in `frontend/src/hooks/useFoodLog.ts`; set it on refinement failure in the `refine` callback; clear it on new refinement attempt, confirm, cancel, or dismiss; expose it in the return object
+- [X] T010 [US2] Update `ParseResultProps` in `frontend/src/components/ParseResult.tsx` to accept `refineError: string | null`; display an inline error message below the refinement input when `refineError` is set
+- [X] T011 [US2] Wire `refineError` from `useFoodLog` hook into `ParseResult` component in `frontend/src/pages/FoodLog.tsx`
 
 **Checkpoint**: Both refinement flow and error handling work independently. Users can confirm previous results after a failed refinement.
 
@@ -63,9 +63,9 @@
 
 **Purpose**: Validation, cleanup, and test fixes
 
-- [ ] T012 Run TypeScript type check (`cd frontend && npx tsc --noEmit`) and fix any type errors
-- [ ] T013 Run existing test suite (`cd frontend && npx vitest run`) and fix any broken tests caused by the new `refine` callback, `refinementHistory` state, or `'refining'` status (update mock return objects in `frontend/src/hooks/useFoodLog.test.ts` if needed)
-- [ ] T014 Run linter (`cd frontend && npm run lint`) and fix any lint errors
+- [X] T012 Run TypeScript type check (`cd frontend && npx tsc --noEmit`) and fix any type errors
+- [X] T013 Run existing test suite (`cd frontend && npx vitest run`) and fix any broken tests caused by the new `refine` callback, `refinementHistory` state, or `'refining'` status (update mock return objects in `frontend/src/hooks/useFoodLog.test.ts` if needed)
+- [X] T014 Run linter (`cd frontend && npm run lint`) and fix any lint errors
 
 ---
 

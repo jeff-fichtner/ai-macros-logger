@@ -1,12 +1,12 @@
 import { useState, useCallback } from 'react';
 import type { AIParseResult, FoodEntry, DailySummary, WriteError } from '@/types';
-import { parseFood } from '@/services/parse';
+import { parseFood, buildRefinementPrompt } from '@/services/parse';
 import { readAllEntries, writeEntries, ensureLogSheet, deleteEntries, SheetsApiError } from '@/services/sheets';
 import { refreshToken } from '@/services/oauth';
 import { useSettings } from '@/hooks/useSettings';
 import { parseEntryTimestamp, formatLocalDate } from '@/utils/entryTime';
 
-type Status = 'idle' | 'parsing' | 'writing' | 'loading' | 'deleting';
+type Status = 'idle' | 'parsing' | 'writing' | 'loading' | 'deleting' | 'refining';
 
 export function useFoodLog() {
   const settings = useSettings();
@@ -20,6 +20,8 @@ export function useFoodLog() {
   const [writeError, setWriteError] = useState<WriteError | null>(null);
   const [lastAteAt, setLastAteAt] = useState<Date | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [refinementHistory, setRefinementHistory] = useState<string[]>([]);
+  const [refineError, setRefineError] = useState<string | null>(null);
 
   const todayStr = () => {
     const now = new Date();
@@ -145,11 +147,13 @@ export function useFoodLog() {
     if (!parseResult) return;
     setStatus('writing');
     setWriteError(null);
+    setRefineError(null);
     try {
       await attemptWrite(settings.googleAccessToken);
       setParseResult(null);
       setRawInput('');
       setWriteError(null);
+      setRefinementHistory([]);
       await loadTodaysEntries();
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to save entries to Google Sheets';
@@ -168,6 +172,7 @@ export function useFoodLog() {
           setParseResult(null);
           setRawInput('');
           setWriteError(null);
+          setRefinementHistory([]);
           await loadTodaysEntries();
           return;
         } catch {
@@ -198,6 +203,8 @@ export function useFoodLog() {
     setRawInput('');
     setWriteError(null);
     setError(null);
+    setRefinementHistory([]);
+    setRefineError(null);
   }, []);
 
   const cancel = useCallback(() => {
@@ -205,7 +212,30 @@ export function useFoodLog() {
     setRawInput('');
     setError(null);
     setWriteError(null);
+    setRefinementHistory([]);
+    setRefineError(null);
   }, []);
+
+  const refine = useCallback(async (instruction: string) => {
+    if (!instruction.trim() || !parseResult) return;
+    setStatus('refining');
+    setRefineError(null);
+    try {
+      const activeConfig = settings.aiProviders.find((p) => p.provider === settings.activeProvider);
+      if (!activeConfig) {
+        throw new Error('No active AI provider configured');
+      }
+      const newHistory = [...refinementHistory, instruction];
+      const combinedPrompt = buildRefinementPrompt(rawInput, parseResult, newHistory);
+      const result = await parseFood(activeConfig.provider, activeConfig.apiKey, combinedPrompt);
+      setParseResult(result);
+      setRefinementHistory(newHistory);
+    } catch (err) {
+      setRefineError(err instanceof Error ? err.message : 'Failed to refine results');
+    } finally {
+      setStatus('idle');
+    }
+  }, [parseResult, rawInput, refinementHistory, settings.aiProviders, settings.activeProvider]);
 
   const attemptDelete = useCallback(async (sheetRows: number[], accessToken: string) => {
     await deleteEntries(settings.spreadsheetId, accessToken, sheetRows);
@@ -290,8 +320,11 @@ export function useFoodLog() {
     error,
     writeError,
     deleteError,
+    refineError,
+    refinementHistory,
     lastAteAt,
     parse,
+    refine,
     confirm,
     retry,
     dismiss,
