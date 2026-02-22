@@ -8,6 +8,8 @@ Auto-generated from all feature plans. Last updated: 2026-02-20
 - TypeScript 5.9, Node.js 20 LTS + React 19, Vite 7, Zustand 5, Azure Functions v4, Tailwind CSS v4 (003-multi-provider-ai)
 - Browser localStorage (Zustand persist), Google Sheets (data) (003-multi-provider-ai)
 - Google Sheets (flat rows with 2 new columns: Group ID, Meal Label) (004-meal-grouping)
+- TypeScript 5.x, Node.js 20 LTS + React 19, Vite, Zustand 5, Tailwind CSS v4 (005-delete-entries)
+- Google Sheets API (single "Log" sheet per user) (005-delete-entries)
 
 - TypeScript 5.x, Node.js 20 LTS + React 19, Vite, React Router v7, Zustand, Tailwind CSS v4, Azure Functions v4 (Node.js model) (001-macro-nutrition-logger)
 
@@ -35,9 +37,9 @@ npm test && npm run lint
 TypeScript 5.x, Node.js 20 LTS: Follow standard conventions
 
 ## Recent Changes
+- 005-delete-entries: Added TypeScript 5.x, Node.js 20 LTS + React 19, Vite, Zustand 5, Tailwind CSS v4
 - 004-meal-grouping: Added TypeScript 5.9, Node.js 20 LTS + React 19, Vite 7, Zustand 5, Azure Functions v4, Tailwind CSS v4
 - 003-multi-provider-ai: Added TypeScript 5.9, Node.js 20 LTS + React 19, Vite 7, Zustand 5, Azure Functions v4, Tailwind CSS v4
-- 002-test-suite: Added TypeScript 5.9, Node.js 20 LTS + Vitest 3.x, @testing-library/react, happy-dom
 
 
 <!-- MANUAL ADDITIONS START -->
