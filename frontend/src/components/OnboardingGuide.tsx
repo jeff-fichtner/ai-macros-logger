@@ -21,9 +21,14 @@ export default function OnboardingGuide() {
     <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
       <h3 className="mb-2 text-sm font-semibold text-blue-800">Setup Guide</h3>
       <div className="divide-y divide-blue-100">
-        <Section title="1. Get a Claude API Key">
-          <p>Go to <strong>console.anthropic.com</strong>, create an account, and generate an API key.</p>
-          <p>The key starts with <code className="rounded bg-blue-100 px-1">sk-ant-</code>.</p>
+        <Section title="1. Add an AI Provider">
+          <p>You need an API key from at least one of these providers:</p>
+          <ul className="ml-4 list-disc space-y-1">
+            <li><strong>Claude</strong> — <code className="rounded bg-blue-100 px-1">console.anthropic.com</code> (key starts with <code className="rounded bg-blue-100 px-1">sk-ant-</code>)</li>
+            <li><strong>OpenAI</strong> — <code className="rounded bg-blue-100 px-1">platform.openai.com/api-keys</code> (key starts with <code className="rounded bg-blue-100 px-1">sk-</code>)</li>
+            <li><strong>Gemini</strong> — <code className="rounded bg-blue-100 px-1">aistudio.google.com/apikey</code></li>
+          </ul>
+          <p>Add the provider and key in the AI Providers section below.</p>
         </Section>
         <Section title="2. Create a Google Cloud Project">
           <p>Go to <strong>console.cloud.google.com</strong> and create a new project.</p>

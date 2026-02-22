@@ -25,8 +25,16 @@ export interface MacroTargets {
   fat_g: number;
 }
 
+export type AIProviderType = 'claude' | 'openai' | 'gemini';
+
+export interface AIProviderConfig {
+  provider: AIProviderType;
+  apiKey: string;
+}
+
 export interface UserConfiguration {
-  claudeApiKey: string;
+  aiProviders: AIProviderConfig[];
+  activeProvider: string;
   googleClientId: string;
   googleClientSecret: string;
   googleAccessToken: string;

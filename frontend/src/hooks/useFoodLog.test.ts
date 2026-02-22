@@ -2,11 +2,11 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useSettings } from '@/hooks/useSettings';
 import { useFoodLog } from '@/hooks/useFoodLog';
-import { parseFood } from '@/services/claude';
+import { parseFood } from '@/services/parse';
 import { readAllEntries, writeEntries, checkLogSheetExists, createLogSheet, SheetsApiError } from '@/services/sheets';
 import { refreshToken } from '@/services/oauth';
 
-vi.mock('@/services/claude', () => ({
+vi.mock('@/services/parse', () => ({
   parseFood: vi.fn(),
 }));
 
@@ -37,7 +37,8 @@ describe('useFoodLog', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-02-21T12:00:00'));
     useSettings.setState({
-      claudeApiKey: 'test-key',
+      aiProviders: [{ provider: 'claude', apiKey: 'test-key' }],
+      activeProvider: 'claude',
       googleClientId: 'cid',
       googleClientSecret: 'csecret',
       googleAccessToken: 'valid-token',

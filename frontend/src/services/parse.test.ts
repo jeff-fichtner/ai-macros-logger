@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { parseFood } from "@/services/claude";
+import { parseFood } from "@/services/parse";
 import { apiPost, ApiRequestError } from "@/services/api";
 import type { AIParseResult } from "@/types";
 
@@ -31,9 +31,10 @@ describe("parseFood", () => {
 
     mockedApiPost.mockResolvedValue(sample);
 
-    const result = await parseFood("test-key", "chicken breast");
+    const result = await parseFood("claude", "test-key", "chicken breast");
 
     expect(mockedApiPost).toHaveBeenCalledWith("/api/parse", {
+      provider: "claude",
       apiKey: "test-key",
       input: "chicken breast",
     });
@@ -44,10 +45,10 @@ describe("parseFood", () => {
     const error = new ApiRequestError(401, { error: "Unauthorized" });
     mockedApiPost.mockRejectedValue(error);
 
-    await expect(parseFood("test-key", "chicken breast")).rejects.toThrow(
+    await expect(parseFood("claude", "test-key", "chicken breast")).rejects.toThrow(
       error,
     );
-    await expect(parseFood("test-key", "chicken breast")).rejects.toBeInstanceOf(
+    await expect(parseFood("claude", "test-key", "chicken breast")).rejects.toBeInstanceOf(
       ApiRequestError,
     );
   });

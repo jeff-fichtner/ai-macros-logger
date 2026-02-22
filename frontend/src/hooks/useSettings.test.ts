@@ -3,7 +3,8 @@ import { useSettings } from '@/hooks/useSettings';
 
 beforeEach(() => {
   useSettings.setState({
-    claudeApiKey: '',
+    aiProviders: [],
+    activeProvider: '',
     googleClientId: '',
     googleClientSecret: '',
     googleAccessToken: '',
@@ -14,9 +15,10 @@ beforeEach(() => {
   });
 });
 
-it('isConfigured returns true when all credentials set', () => {
+it('isConfigured returns true when provider and all credentials set', () => {
   useSettings.setState({
-    claudeApiKey: 'sk-test',
+    aiProviders: [{ provider: 'claude', apiKey: 'sk-test' }],
+    activeProvider: 'claude',
     googleClientId: 'client-id',
     googleClientSecret: 'client-secret',
     spreadsheetId: 'sheet-123',
@@ -25,15 +27,28 @@ it('isConfigured returns true when all credentials set', () => {
   expect(useSettings.getState().isConfigured()).toBe(true);
 });
 
+it('isConfigured returns false when no providers configured', () => {
+  useSettings.setState({
+    aiProviders: [],
+    activeProvider: '',
+    googleClientId: 'client-id',
+    googleClientSecret: 'client-secret',
+    spreadsheetId: 'sheet-123',
+  });
+
+  expect(useSettings.getState().isConfigured()).toBe(false);
+});
+
 it('isConfigured returns false for each missing credential', () => {
   const base = {
-    claudeApiKey: 'sk-test',
+    aiProviders: [{ provider: 'claude' as const, apiKey: 'sk-test' }],
+    activeProvider: 'claude',
     googleClientId: 'client-id',
     googleClientSecret: 'client-secret',
     spreadsheetId: 'sheet-123',
   };
 
-  useSettings.setState({ ...base, claudeApiKey: '' });
+  useSettings.setState({ ...base, activeProvider: '' });
   expect(useSettings.getState().isConfigured()).toBe(false);
 
   useSettings.setState({ ...base, googleClientId: '' });
@@ -44,6 +59,60 @@ it('isConfigured returns false for each missing credential', () => {
 
   useSettings.setState({ ...base, spreadsheetId: '' });
   expect(useSettings.getState().isConfigured()).toBe(false);
+});
+
+it('addProvider adds a new provider and auto-sets active if none', () => {
+  useSettings.getState().addProvider('claude', 'sk-ant-test');
+
+  const state = useSettings.getState();
+  expect(state.aiProviders).toEqual([{ provider: 'claude', apiKey: 'sk-ant-test' }]);
+  expect(state.activeProvider).toBe('claude');
+});
+
+it('addProvider does not duplicate existing provider', () => {
+  useSettings.getState().addProvider('claude', 'sk-ant-test');
+  useSettings.getState().addProvider('claude', 'sk-ant-test-2');
+
+  expect(useSettings.getState().aiProviders).toHaveLength(1);
+  expect(useSettings.getState().aiProviders[0].apiKey).toBe('sk-ant-test');
+});
+
+it('addProvider keeps existing activeProvider when adding second provider', () => {
+  useSettings.getState().addProvider('claude', 'sk-ant-test');
+  useSettings.getState().addProvider('openai', 'sk-openai-test');
+
+  expect(useSettings.getState().activeProvider).toBe('claude');
+  expect(useSettings.getState().aiProviders).toHaveLength(2);
+});
+
+it('removeProvider removes provider and reassigns active if needed', () => {
+  useSettings.getState().addProvider('claude', 'sk-ant-test');
+  useSettings.getState().addProvider('openai', 'sk-openai-test');
+  useSettings.getState().setActiveProvider('claude');
+
+  useSettings.getState().removeProvider('claude');
+
+  const state = useSettings.getState();
+  expect(state.aiProviders).toHaveLength(1);
+  expect(state.aiProviders[0].provider).toBe('openai');
+  expect(state.activeProvider).toBe('openai');
+});
+
+it('removeProvider clears activeProvider when last provider removed', () => {
+  useSettings.getState().addProvider('claude', 'sk-ant-test');
+  useSettings.getState().removeProvider('claude');
+
+  const state = useSettings.getState();
+  expect(state.aiProviders).toHaveLength(0);
+  expect(state.activeProvider).toBe('');
+});
+
+it('setActiveProvider switches the active provider', () => {
+  useSettings.getState().addProvider('claude', 'sk-ant-test');
+  useSettings.getState().addProvider('openai', 'sk-openai-test');
+
+  useSettings.getState().setActiveProvider('openai');
+  expect(useSettings.getState().activeProvider).toBe('openai');
 });
 
 describe('time-dependent tests', () => {
@@ -116,7 +185,7 @@ it('clearTokens resets all token fields and expiry to 0', () => {
 });
 
 it('persist middleware writes state to localStorage after changes', async () => {
-  useSettings.getState().setClaudeApiKey('sk-persist-test');
+  useSettings.getState().addProvider('claude', 'sk-persist-test');
 
   await new Promise((resolve) => setTimeout(resolve, 0));
 

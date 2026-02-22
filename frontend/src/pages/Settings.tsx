@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSettings } from '@/hooks/useSettings';
 import { useGoogleAuth } from '@/hooks/useGoogleAuth';
 import OnboardingGuide from '@/components/OnboardingGuide';
+import ProviderList from '@/components/ProviderList';
 import type { MacroTargets } from '@/types';
 
 function extractSpreadsheetId(input: string): string {
@@ -15,20 +16,17 @@ export default function Settings() {
   const { connect, disconnect, isConnected } = useGoogleAuth();
   const navigate = useNavigate();
 
-  const [claudeKey, setClaudeKey] = useState(settings.claudeApiKey);
   const [clientId, setClientId] = useState(settings.googleClientId);
   const [clientSecret, setClientSecret] = useState(settings.googleClientSecret);
   const [sheetInput, setSheetInput] = useState(settings.spreadsheetId);
   const [targets, setTargets] = useState<MacroTargets | null>(settings.macroTargets);
   const handleSave = () => {
-    settings.setClaudeApiKey(claudeKey.trim());
     settings.setGoogleCredentials(clientId.trim(), clientSecret.trim());
     settings.setSpreadsheetId(extractSpreadsheetId(sheetInput));
     settings.setMacroTargets(targets);
     navigate('/');
   };
 
-  const claudeKeyValid = claudeKey.trim() === '' || claudeKey.trim().startsWith('sk-ant-');
   const sheetIdExtracted = extractSpreadsheetId(sheetInput);
 
   return (
@@ -36,21 +34,12 @@ export default function Settings() {
       <OnboardingGuide />
 
       <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-gray-900">Credentials</h2>
+        <h2 className="text-lg font-semibold text-gray-900">AI Providers</h2>
+        <ProviderList />
+      </section>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Claude API Key</label>
-          <input
-            type="password"
-            value={claudeKey}
-            onChange={(e) => setClaudeKey(e.target.value)}
-            placeholder="sk-ant-api03-..."
-            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          />
-          {!claudeKeyValid && (
-            <p className="mt-1 text-xs text-red-600">API key should start with sk-ant-</p>
-          )}
-        </div>
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold text-gray-900">Google Credentials</h2>
 
         <div>
           <label className="block text-sm font-medium text-gray-700">Google OAuth Client ID</label>

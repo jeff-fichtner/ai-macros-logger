@@ -4,43 +4,20 @@ import {
   HttpResponseInit,
   InvocationContext,
 } from "@azure/functions";
+import type { ProviderHandler } from "../providers/types.js";
+import { callProvider as callClaude } from "../providers/claude.js";
+import { callProvider as callOpenAI } from "../providers/openai.js";
+import { callProvider as callGemini } from "../providers/gemini.js";
 
 interface ParseRequestBody {
+  provider: string;
   apiKey: string;
   input: string;
 }
 
-interface FoodItem {
-  description: string;
-  calories: number;
-  protein_g: number;
-  carbs_g: number;
-  fat_g: number;
-  warning?: string;
-}
+const VALID_PROVIDERS = ["claude", "openai", "gemini"] as const;
 
-interface ClaudeToolUseBlock {
-  type: "tool_use";
-  id: string;
-  name: string;
-  input: { items: FoodItem[] };
-}
-
-interface ClaudeContentBlock {
-  type: string;
-  id?: string;
-  name?: string;
-  input?: unknown;
-  text?: string;
-}
-
-interface ClaudeResponse {
-  content: ClaudeContentBlock[];
-}
-
-const CLAUDE_API_URL = "https://api.anthropic.com/v1/messages";
-
-const SYSTEM_PROMPT = `You are a nutrition data extraction assistant. Your job is to parse natural language food descriptions into structured macronutrient data.
+export const SYSTEM_PROMPT = `You are a nutrition data extraction assistant. Your job is to parse natural language food descriptions into structured macronutrient data.
 
 Guidelines:
 - Use USDA FoodData Central reference values for standard portions and common foods.
@@ -50,37 +27,10 @@ Guidelines:
 - Round calories to the nearest whole number. Round grams to one decimal place.
 - If the input does not describe food at all, return a single item with description "Not a food item", all macros set to 0, and a warning explaining why the input could not be parsed as food.`;
 
-const PARSE_FOOD_ITEMS_TOOL = {
-  name: "parse_food_items",
-  description:
-    "Parse food items from a natural language description into structured nutritional data",
-  input_schema: {
-    type: "object" as const,
-    properties: {
-      items: {
-        type: "array" as const,
-        items: {
-          type: "object" as const,
-          properties: {
-            description: { type: "string" as const },
-            calories: { type: "number" as const },
-            protein_g: { type: "number" as const },
-            carbs_g: { type: "number" as const },
-            fat_g: { type: "number" as const },
-            warning: { type: "string" as const },
-          },
-          required: [
-            "description",
-            "calories",
-            "protein_g",
-            "carbs_g",
-            "fat_g",
-          ],
-        },
-      },
-    },
-    required: ["items"],
-  },
+const providers: Record<string, ProviderHandler> = {
+  claude: callClaude,
+  openai: callOpenAI,
+  gemini: callGemini,
 };
 
 export async function parseHandler(
@@ -95,6 +45,20 @@ export async function parseHandler(
     return jsonResponse(400, { error: "Invalid JSON in request body" });
   }
 
+  if (!body.provider || typeof body.provider !== "string") {
+    return jsonResponse(400, { error: "Missing required field: provider" });
+  }
+
+  if (
+    !VALID_PROVIDERS.includes(
+      body.provider as (typeof VALID_PROVIDERS)[number],
+    )
+  ) {
+    return jsonResponse(400, {
+      error: `Unsupported provider: ${body.provider}`,
+    });
+  }
+
   if (!body.apiKey || typeof body.apiKey !== "string") {
     return jsonResponse(400, { error: "Missing required field: apiKey" });
   }
@@ -103,59 +67,21 @@ export async function parseHandler(
     return jsonResponse(400, { error: "Missing required field: input" });
   }
 
-  let claudeResponse: Response;
+  const handler = providers[body.provider];
 
   try {
-    claudeResponse = await fetch(CLAUDE_API_URL, {
-      method: "POST",
-      headers: {
-        "x-api-key": body.apiKey,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 1024,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: "user", content: body.input }],
-        tools: [PARSE_FOOD_ITEMS_TOOL],
-        tool_choice: { type: "tool", name: "parse_food_items" },
-      }),
-    });
+    const items = await handler(body.apiKey, SYSTEM_PROMPT, body.input);
+    return jsonResponse(200, { items });
   } catch (err) {
-    return jsonResponse(502, {
-      error: `Failed to reach Claude API: ${err instanceof Error ? err.message : String(err)}`,
-    });
+    const message = err instanceof Error ? err.message : String(err);
+    const status =
+      (err as { status?: number }).status === 401
+        ? 401
+        : (err as { status?: number }).status === 429
+          ? 429
+          : 502;
+    return jsonResponse(status, { error: message });
   }
-
-  if (!claudeResponse.ok) {
-    const text = await claudeResponse.text().catch(() => "");
-    return jsonResponse(claudeResponse.status === 401 ? 401 : claudeResponse.status === 429 ? 429 : 502, {
-      error: `Claude API ${claudeResponse.status}: ${text || claudeResponse.statusText}`,
-    });
-  }
-
-  let claudeBody: ClaudeResponse;
-
-  try {
-    claudeBody = (await claudeResponse.json()) as ClaudeResponse;
-  } catch (err) {
-    return jsonResponse(502, {
-      error: `Failed to parse Claude response: ${err instanceof Error ? err.message : String(err)}`,
-    });
-  }
-
-  const toolUseBlock = claudeBody.content?.find(
-    (block): block is ClaudeToolUseBlock => block.type === "tool_use",
-  );
-
-  if (!toolUseBlock?.input?.items || !Array.isArray(toolUseBlock.input.items)) {
-    return jsonResponse(502, {
-      error: `Unexpected Claude response structure: ${JSON.stringify(claudeBody.content?.map((b) => b.type))}`,
-    });
-  }
-
-  return jsonResponse(200, { items: toolUseBlock.input.items });
 }
 
 function jsonResponse(

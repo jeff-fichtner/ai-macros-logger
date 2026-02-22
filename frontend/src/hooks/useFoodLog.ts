@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import type { AIParseResult, FoodEntry, DailySummary } from '@/types';
-import { parseFood } from '@/services/claude';
+import { parseFood } from '@/services/parse';
 import { readAllEntries, writeEntries, checkLogSheetExists, createLogSheet, SheetsApiError } from '@/services/sheets';
 import { refreshToken } from '@/services/oauth';
 import { useSettings } from '@/hooks/useSettings';
@@ -70,14 +70,18 @@ export function useFoodLog() {
     setRawInput(input);
     setStatus('parsing');
     try {
-      const result = await parseFood(settings.claudeApiKey, input);
+      const activeConfig = settings.aiProviders.find((p) => p.provider === settings.activeProvider);
+      if (!activeConfig) {
+        throw new Error('No active AI provider configured');
+      }
+      const result = await parseFood(activeConfig.provider, activeConfig.apiKey, input);
       setParseResult(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to parse food');
     } finally {
       setStatus('idle');
     }
-  }, [settings.claudeApiKey]);
+  }, [settings.aiProviders, settings.activeProvider]);
 
   const attemptWrite = useCallback(async (accessToken: string) => {
     if (!parseResult) return;
