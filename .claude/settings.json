@@ -8,7 +8,24 @@
       "Bash(npm run lint)",
       "Bash(func:*)",
       "Bash(lsof:*)",
-      "Bash(xargs kill:*)"
+      "Bash(xargs kill:*)",
+      "Bash(.specify/scripts/bash/create-new-feature.sh:*)",
+      "Bash(.specify/scripts/bash/setup-plan.sh:*)",
+      "WebFetch(domain:platform.openai.com)",
+      "WebFetch(domain:ai.google.dev)",
+      "Bash(.specify/scripts/bash/update-agent-context.sh:*)",
+      "Bash(git mv:*)",
+      "Bash(/Users/sherlock/dev/snackbyte/ai-macros-logger/.specify/scripts/bash/update-agent-context.sh:*)",
+      "Bash(npm run:*)",
+      "Bash(git -C /Users/sherlock/dev/snackbyte/ai-macros-logger branch --show-current)",
+      "WebFetch(domain:developers.google.com)",
+      "WebFetch(domain:gist.github.com)",
+      "Bash(git -C /Users/sherlock/dev/snackbyte/ai-macros-logger status)",
+      "Bash(git -C /Users/sherlock/dev/snackbyte/ai-macros-logger diff)",
+      "Bash(git -C /Users/sherlock/dev/snackbyte/ai-macros-logger log --oneline -5)",
+      "Bash(git -C /Users/sherlock/dev/snackbyte/ai-macros-logger add specs/005-delete-entries/ CLAUDE.md)",
+      "Bash(git -C:*)",
+      "Bash(git status:*)"
     ]
   }
 }
