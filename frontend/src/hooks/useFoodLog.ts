@@ -4,7 +4,7 @@ import { parseFood } from '@/services/parse';
 import { readAllEntries, writeEntries, ensureLogSheet, SheetsApiError } from '@/services/sheets';
 import { refreshToken } from '@/services/oauth';
 import { useSettings } from '@/hooks/useSettings';
-import { parseEntryTimestamp, formatLocalDate } from '@/utils/entryTime';
+import { parseEntryTimestamp, formatLocalDate, formatLocalTime } from '@/utils/entryTime';
 
 type Status = 'idle' | 'parsing' | 'writing' | 'loading';
 
@@ -18,6 +18,7 @@ export function useFoodLog() {
   const [summary, setSummary] = useState<DailySummary | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [writeError, setWriteError] = useState<WriteError | null>(null);
+  const [lastAteAt, setLastAteAt] = useState<Date | null>(null);
 
   const todayStr = () => {
     const now = new Date();
@@ -60,6 +61,17 @@ export function useFoodLog() {
     try {
       await ensureLogSheet(settings.spreadsheetId, settings.googleAccessToken);
       const allEntries = await readAllEntries(settings.spreadsheetId, settings.googleAccessToken);
+
+      // Find most recent entry across all dates
+      let latestTs: Date | null = null;
+      for (const e of allEntries) {
+        const ts = parseEntryTimestamp(e);
+        if (ts && (!latestTs || ts.getTime() > latestTs.getTime())) {
+          latestTs = ts;
+        }
+      }
+      setLastAteAt(latestTs);
+
       const today = todayStr();
       const todayEntries = allEntries
         .filter((e) => {
@@ -200,6 +212,7 @@ export function useFoodLog() {
     summary,
     error,
     writeError,
+    lastAteAt,
     parse,
     confirm,
     retry,

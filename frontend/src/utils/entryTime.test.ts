@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseEntryTimestamp, formatLocalTime, formatLocalDate } from '@/utils/entryTime';
+import { parseEntryTimestamp, formatLocalTime, formatLocalDate, formatRelativeDate } from '@/utils/entryTime';
 import type { FoodEntry } from '@/types';
 
 function makeEntry(overrides: Partial<FoodEntry> = {}): FoodEntry {
@@ -103,5 +103,39 @@ describe('formatLocalDate', () => {
   it('formats date with double-digit month and day', () => {
     const d = new Date(2026, 11, 25);
     expect(formatLocalDate(d)).toBe('2026-12-25');
+  });
+});
+
+describe('formatRelativeDate', () => {
+  // Fixed "now": Sunday Feb 22 2026
+  const now = new Date(2026, 1, 22, 15, 0);
+
+  it('returns "Today" for same day', () => {
+    const d = new Date(2026, 1, 22, 9, 0);
+    expect(formatRelativeDate(d, now)).toBe('today');
+  });
+
+  it('returns "yesterday" for previous day', () => {
+    const d = new Date(2026, 1, 21, 20, 0);
+    expect(formatRelativeDate(d, now)).toBe('yesterday');
+  });
+
+  it('returns day name for 2-6 days ago', () => {
+    // 2 days ago = Friday Feb 20
+    expect(formatRelativeDate(new Date(2026, 1, 20, 12, 0), now)).toBe('Friday');
+    // 6 days ago = Monday Feb 16
+    expect(formatRelativeDate(new Date(2026, 1, 16, 12, 0), now)).toBe('Monday');
+  });
+
+  it('returns full format for 7+ days ago', () => {
+    // 7 days ago = Sunday Feb 15
+    expect(formatRelativeDate(new Date(2026, 1, 15, 12, 0), now)).toBe('Sunday, Feb 15');
+    // Older date
+    expect(formatRelativeDate(new Date(2026, 0, 3, 12, 0), now)).toBe('Saturday, Jan 3');
+  });
+
+  it('returns full format for future dates', () => {
+    const future = new Date(2026, 1, 25, 12, 0);
+    expect(formatRelativeDate(future, now)).toBe('Wednesday, Feb 25');
   });
 });

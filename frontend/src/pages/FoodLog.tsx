@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSettings } from '@/hooks/useSettings';
 import { useFoodLog } from '@/hooks/useFoodLog';
+import { formatRelativeDate, formatLocalTime } from '@/utils/entryTime';
 import FoodInput from '@/components/FoodInput';
 import ParseResult from '@/components/ParseResult';
 import MacroSummary from '@/components/MacroSummary';
@@ -10,7 +11,7 @@ import EntryHistory from '@/components/EntryHistory';
 export default function FoodLog() {
   const settings = useSettings();
   const navigate = useNavigate();
-  const { status, parseResult, entries, summary, error, writeError, parse, confirm, retry, dismiss, cancel, loadTodaysEntries } = useFoodLog();
+  const { status, parseResult, entries, summary, error, writeError, lastAteAt, parse, confirm, retry, dismiss, cancel, loadTodaysEntries } = useFoodLog();
 
   const configured = settings.isConfigured();
   const connected = settings.isGoogleConnected();
@@ -99,6 +100,12 @@ export default function FoodLog() {
       )}
 
       <MacroSummary summary={summary} targets={settings.macroTargets} />
+
+      {lastAteAt && (
+        <p className="text-xs text-gray-400">
+          Last ate {formatRelativeDate(lastAteAt)} at {formatLocalTime(lastAteAt)}
+        </p>
+      )}
 
       <EntryHistory entries={entries} />
     </div>
