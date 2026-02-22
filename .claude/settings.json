@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(.specify/scripts/bash/check-prerequisites.sh:*)",
+      "Bash(npx vitest run:*)",
+      "Bash(npx vitest:*)",
+      "Bash(npm test:*)",
+      "Bash(npm run lint)",
+      "Bash(func:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill:*)"
+    ]
+  }
+}
