@@ -49,7 +49,7 @@ export default function OnboardingGuide() {
               <strong>Configure OAuth consent screen</strong> — Under APIs & Services → OAuth consent screen, set up your app. Set publishing status to <strong>"In production"</strong> to avoid refresh tokens expiring every 7 days.
             </li>
             <li>
-              <strong>Create OAuth credentials</strong> — Go to Credentials → Create Credentials → OAuth client ID. Choose <strong>Web application</strong>. Add redirect URI: <code className="rounded bg-blue-100 px-1">http://localhost:5173/settings</code> (or your app URL + <code className="rounded bg-blue-100 px-1">/settings</code>). Copy the <strong>Client ID</strong> and <strong>Client Secret</strong>.
+              <strong>Create OAuth credentials</strong> — Go to Credentials → Create Credentials → OAuth client ID. Choose <strong>Web application</strong>. Under <strong>Authorized JavaScript origins</strong>, add <code className="rounded bg-blue-100 px-1">https://zealous-sea-0d3ac6b10.1.azurestaticapps.net</code>. Under <strong>Authorized redirect URIs</strong>, add <code className="rounded bg-blue-100 px-1">https://zealous-sea-0d3ac6b10.1.azurestaticapps.net/settings</code>. Copy the <strong>Client ID</strong> and <strong>Client Secret</strong>.
             </li>
           </ol>
         </Section>
