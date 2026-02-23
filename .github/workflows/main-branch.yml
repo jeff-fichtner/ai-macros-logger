@@ -35,7 +35,23 @@ jobs:
 
       - name: Create and push production tag
         if: steps.check_tag.outputs.exists == 'false'
-        run: |
-          TAG="v${{ steps.version.outputs.version }}"
-          git tag -a "$TAG" -m "Production release ${{ steps.version.outputs.version }}"
-          git push origin "$TAG"
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.TAG_PAT }}
+          script: |
+            const tag = `v${{ steps.version.outputs.version }}`;
+            const sha = context.sha;
+            const tagObject = await github.rest.git.createTag({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag: tag,
+              message: `Production release ${{ steps.version.outputs.version }}`,
+              object: sha,
+              type: 'commit',
+            });
+            await github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `refs/tags/${tag}`,
+              sha: tagObject.data.sha,
+            });
