@@ -79,9 +79,9 @@ export default function EntryHistory({ entries, onDeleteGroup, onDeleteEntry, de
                     </div>
                   </div>
                   <div className="mt-1 flex gap-3 text-xs text-gray-500">
-                    <span>P: {entry.protein_g}g</span>
-                    <span>C: {entry.carbs_g}g</span>
-                    <span>F: {entry.fat_g}g</span>
+                    <span>P: {+entry.protein_g.toFixed(1)}g</span>
+                    <span>C: {+entry.carbs_g.toFixed(1)}g</span>
+                    <span>F: {+entry.fat_g.toFixed(1)}g</span>
                   </div>
                 </div>
               ))}
@@ -89,10 +89,10 @@ export default function EntryHistory({ entries, onDeleteGroup, onDeleteEntry, de
             <div className="flex items-center justify-between border-t border-gray-100 bg-gray-50 px-3 py-2 text-xs font-medium text-gray-600">
               <span>Subtotal</span>
               <div className="flex gap-3">
-                <span>{group.totals.calories} cal</span>
-                <span>P: {group.totals.protein_g}g</span>
-                <span>C: {group.totals.carbs_g}g</span>
-                <span>F: {group.totals.fat_g}g</span>
+                <span>{+group.totals.calories.toFixed(1)} cal</span>
+                <span>P: {+group.totals.protein_g.toFixed(1)}g</span>
+                <span>C: {+group.totals.carbs_g.toFixed(1)}g</span>
+                <span>F: {+group.totals.fat_g.toFixed(1)}g</span>
               </div>
             </div>
           </div>
