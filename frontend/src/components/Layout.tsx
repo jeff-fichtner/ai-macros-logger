@@ -5,7 +5,7 @@ export default function Layout() {
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white border-b border-gray-200">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-          <span className="text-lg font-semibold text-gray-900">Macro Logger</span>
+          <span className="text-lg font-semibold text-gray-900">Macros Logger</span>
           <div className="flex gap-4">
             <NavLink
               to="/"
