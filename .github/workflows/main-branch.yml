@@ -10,6 +10,7 @@ permissions:
 jobs:
   tag-production:
     name: Tag Production
+    if: false # Disabled until production environment is configured
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
