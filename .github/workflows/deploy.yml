@@ -1,9 +1,11 @@
 name: Deploy
 
 on:
-  push:
-    tags:
-      - "v[0-9]+.[0-9]+.[0-9]+*"
+  create:
+
+# Only runs when a tag matching the version pattern is created.
+# Uses `on: create` instead of `on: push: tags` because the tagged
+# commit contains [skip ci] which suppresses push-triggered workflows.
 
 permissions:
   contents: read
@@ -12,6 +14,7 @@ jobs:
   resolve-env:
     name: Resolve Environment
     runs-on: ubuntu-latest
+    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
     outputs:
       environment: ${{ steps.env.outputs.environment }}
       version: ${{ steps.version.outputs.version }}
