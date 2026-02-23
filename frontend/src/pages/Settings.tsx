@@ -161,6 +161,10 @@ export default function Settings() {
           Save Settings
         </button>
       </div>
+
+      <p className="text-xs text-gray-400">
+        v{import.meta.env.VITE_APP_VERSION || 'dev'}
+      </p>
     </div>
   );
 }
