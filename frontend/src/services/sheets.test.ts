@@ -6,6 +6,7 @@ import {
   columnLetter,
   SheetsApiError,
 } from "@/services/sheets";
+import type { FoodEntry } from "@/types";
 
 const SPREADSHEET_ID = "test-spreadsheet-id";
 const ACCESS_TOKEN = "test-access-token";
@@ -174,7 +175,7 @@ describe("writeEntries", () => {
   it("success with correct payload structure", async () => {
     const fetchSpy = mockFetchResponse({});
 
-    const entry = {
+    const entry: FoodEntry = {
       date: "2026-02-21",
       time: "12:00 PM",
       description: "Chicken",
@@ -186,6 +187,7 @@ describe("writeEntries", () => {
       group_id: "abc123",
       meal_label: "Lunch",
       utc_offset: "-08:00",
+      sheetRow: 2,
     };
 
     await writeEntries(SPREADSHEET_ID, ACCESS_TOKEN, [entry]);
@@ -205,7 +207,7 @@ describe("writeEntries", () => {
   it("error throws SheetsApiError", async () => {
     mockFetchResponse(null, { ok: false, status: 403, statusText: "Forbidden" });
 
-    const entry = {
+    const entry: FoodEntry = {
       date: "2026-02-21",
       time: "12:00 PM",
       description: "Chicken",
@@ -217,6 +219,7 @@ describe("writeEntries", () => {
       group_id: "abc123",
       meal_label: "Lunch",
       utc_offset: "-08:00",
+      sheetRow: 2,
     };
 
     await expect(writeEntries(SPREADSHEET_ID, ACCESS_TOKEN, [entry])).rejects.toThrow(SheetsApiError);

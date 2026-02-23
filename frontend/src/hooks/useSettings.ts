@@ -113,7 +113,7 @@ export const useSettings = create<SettingsStore>()(
           }
           delete state.claudeApiKey;
         }
-        return state as UserConfiguration;
+        return state as unknown as UserConfiguration;
       },
     }
   )

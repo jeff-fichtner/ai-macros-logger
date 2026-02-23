@@ -34,8 +34,8 @@ jobs:
           cd frontend && npm ci
           cd ../api && npm ci
 
-      - name: Type check (frontend)
-        run: cd frontend && npx tsc --noEmit
+      - name: Build frontend
+        run: cd frontend && npm run build
 
       - name: Type check (api)
         run: cd api && npx tsc --noEmit
