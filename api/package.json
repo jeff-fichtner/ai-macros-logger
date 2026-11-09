@@ -8,12 +8,16 @@
     "build": "tsc",
     "start": "func start",
     "dev": "tsc --watch & func start",
-    "test": "vitest --run"
+    "test": "vitest --run",
+    "eval": "tsx evals/run.ts",
+    "typecheck:evals": "tsc -p evals"
   },
   "dependencies": {
     "@azure/functions": "^4.6.0"
   },
   "devDependencies": {
+    "@types/node": "^20.19.43",
+    "tsx": "^4.23.15",
     "typescript": "~5.9.3",
     "vitest": "^3.2.4"
   }
