@@ -1,0 +1,106 @@
+{
+  "runs": 66,
+  "passRate": 0.955,
+  "checkPassRates": {
+    "schema": 1,
+    "rounding": 1,
+    "meal_label": 1,
+    "energy": 1,
+    "item_count": 1,
+    "calories": 0.95,
+    "macros": 1,
+    "warning": 1,
+    "mentions": 1,
+    "not_food": 1
+  },
+  "caseConsistency": {
+    "eggs-two-large": {
+      "passRate": 1,
+      "calorieCv": 0.003
+    },
+    "rice-cooked-cup": {
+      "passRate": 1,
+      "calorieCv": 0
+    },
+    "banana-medium": {
+      "passRate": 1,
+      "calorieCv": 0
+    },
+    "chicken-breast-6oz": {
+      "passRate": 1,
+      "calorieCv": 0
+    },
+    "peanut-butter-tbsp": {
+      "passRate": 1,
+      "calorieCv": 0
+    },
+    "quinoa-grams": {
+      "passRate": 1,
+      "calorieCv": 0.007
+    },
+    "greek-yogurt-200g": {
+      "passRate": 1,
+      "calorieCv": 0.056
+    },
+    "whole-milk-16oz": {
+      "passRate": 1,
+      "calorieCv": 0.036
+    },
+    "oatmeal-water-cup": {
+      "passRate": 1,
+      "calorieCv": 0
+    },
+    "salmon-3oz": {
+      "passRate": 0.333,
+      "calorieCv": 0.2
+    },
+    "coke-can": {
+      "passRate": 1,
+      "calorieCv": 0
+    },
+    "breakfast-combo": {
+      "passRate": 0.667,
+      "calorieCv": 0.093
+    },
+    "big-mac-fries": {
+      "passRate": 1,
+      "calorieCv": 0
+    },
+    "pizza-slice": {
+      "passRate": 1,
+      "calorieCv": 0
+    },
+    "caesar-salad": {
+      "passRate": 1,
+      "calorieCv": 0.055
+    },
+    "avocado-whole": {
+      "passRate": 1,
+      "calorieCv": 0
+    },
+    "almonds-vague": {
+      "passRate": 1,
+      "calorieCv": 0
+    },
+    "pasta-vague": {
+      "passRate": 1,
+      "calorieCv": 0
+    },
+    "blueberries-handful": {
+      "passRate": 1,
+      "calorieCv": 0.193
+    },
+    "spanish-eggs-tortilla": {
+      "passRate": 1,
+      "calorieCv": 0.009
+    },
+    "not-food-car-keys": {
+      "passRate": 1,
+      "calorieCv": 0
+    },
+    "not-food-instruction": {
+      "passRate": 1,
+      "calorieCv": 0
+    }
+  }
+}
